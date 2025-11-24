@@ -1,5 +1,5 @@
 ---
-title: "Homepage: P8105 Final Project"
+title: "INSERT TITLE HERE"
 output: 
   html_document:
     toc: true

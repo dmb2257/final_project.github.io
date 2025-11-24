@@ -3,14 +3,20 @@ output_dir: "."
 navbar:
   title: "Home"
   right:
-    - text: "Overview"
-      href: index.html
     - text: "Final Report"
       href: final_report.html
+    - text: "Page 1"
+      href: page1.html
+    - text: "Page 2"
+      href: page2.html
+    - text: "Page 3"
+      href: page3.html
+    - text: "Page 4"
+      href: page4.html
     - icon: fa-envelope fa-lg
       href: mailto:<you@youremail.com>
     - icon: fa-github fa-lg
       href: http://github.com/dmb2257/
 output:
   html_document:
-    theme: cerulean
+    theme: sandstone
