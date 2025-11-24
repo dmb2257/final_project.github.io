@@ -1,34 +1,37 @@
 ---
-title: "P8105 Final Project: Liver Transplants"
+title: "Homepage: P8105 Final Project"
 output: 
   html_document:
     toc: true
     toc_float: true
 ---
 
-# Liver Transplants
+# Introduction
 text/code
 
-## Subsection 1
+# Background
 text/code
 
+# Group Members
+The contributors to this project are Elina Stoffel (es3866), Devon Park (dap2189),
+Olivia Martinez (om2372), and Diane Benites (dmb2257).
 
-## Links to Pages within Sites
+# Screencast
+text here
+insert screen cast
 
-### Page 1
-Brief description of page1. 
-[page1](page1.html)
+# Site Navigation
 
-### Page 2
-Brief description of page2. 
-[page2](page2.html)
+## Page 1 Title
+Brief description of [page1 info](page1.html).
 
-### Page 3
-Brief description of page3. 
-[page3](page3.html)
+## Page 2 Title
+Brief description of [page2 info](page2.html).
 
-### Page 4
-Brief description of page4. 
-[page4](page4.html)
+## Page 3 Title
+Brief description of [page3 info](page3.html).
+
+## Page 4 Title
+Brief description of [page4 info](page4.html).
 
 

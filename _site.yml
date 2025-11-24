@@ -5,6 +5,8 @@ navbar:
   right:
     - text: "Overview"
       href: index.html
+    - text: "Final Report"
+      href: final_report.html
     - icon: fa-envelope fa-lg
       href: mailto:<you@youremail.com>
     - icon: fa-github fa-lg

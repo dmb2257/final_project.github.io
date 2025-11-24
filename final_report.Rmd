@@ -1,0 +1,23 @@
+---
+title: "Final Report"
+output: 
+  html_document:
+    toc: true
+    toc_float: true
+---
+
+
+# Section 1
+text here 
+
+# Section 2
+text here 
+
+# Section 3
+text here 
+
+# Section 4
+text here 
+
+
+
