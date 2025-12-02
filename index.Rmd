@@ -6,8 +6,17 @@ output:
     toc_float: true
 ---
 
+<<<<<<< HEAD
 # Introduction
 text/code
+=======
+# Liver Transplants
+Liver transplantation is a life-saving therapy for patients with end-stage liver disease, and Alcohol-Associated Liver Disease (ALD) has become one of its leading indications in the United States. As ALD-related morbidity and mortality continue to rise, understanding patterns in transplant access, candidate characteristics, and post-transplant outcomes has become increasingly important.
+
+Our project uses data from theh SRTR database that collects data from transplant programs, including the United Network for Organ Sharing (UNOS). It includes a national registry that captures detailed information on all transplant candidates, recipients, and donors in the U.S. The dataset includes demographic variables, clinical severity measures, transplant events, and outcomes, allowing for comprehensive evaluation of the transplant landscape. SRTR make all data available to the public while honoring patient privacy. The data dictionary with all available variables can be found [here](https://www.srtr.org/requesting-srtr-data/saf-data-dictionary/).
+
+In this website, we provide an overview of key aspects of liver transplantation with a focus on ALD, highlighting trends in candidate demographics, transplant rates, and post-transplant outcomes. Our goal is to offer an accessible, data-driven perspective on the evolving role of ALD in liver transplantation.
+>>>>>>> 00622bba028618ba5b5641a31f88274d141745c4
 
 # Background
 text/code
@@ -22,8 +31,13 @@ insert screen cast
 
 # Site Navigation
 
+<<<<<<< HEAD
 ## Page 1 Title
 Brief description of [page1 info](page1.html).
+=======
+### Waitlist Characteristics and Mortality
+This page summarizes demographic and clinical characteristics of adults listed for liver transplantation with alcohol-related liver disease, comparing acute alcohol-related hepatitis and alcohol-related cirrhosis. It presents sex-stratified descriptive statistics, highlights differences in age, MELD score, and racial/ethnic distribution, and reports waitlist mortality and follow-up times. The page also includes Kaplan–Meier curves illustrating waitlist survival patterns across subgroups. Click here to learn more: [Waitlist](page2.html).
+>>>>>>> 00622bba028618ba5b5641a31f88274d141745c4
 
 ## Page 2 Title
 Brief description of [page2 info](page2.html).
