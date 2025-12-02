@@ -1,5 +1,5 @@
 ---
-title: "P8105 Final Project: Liver Transplants"
+title: "P8105 Final Project: Alcohol-Related Liver Transplants"
 output: 
   html_document:
     toc: true
@@ -24,7 +24,7 @@ Brief description of page1.
 [page1](page1.html)
 
 ### Waitlist Characteristics and Mortality
-This page summarizes demographic and clinical characteristics of adults listed for liver transplantation with alcohol-related liver disease, comparing acute alcohol-related hepatitis and alcohol-related cirrhosis. It presents sex-stratified descriptive statistics, highlights differences in age, MELD score, and racial/ethnic distribution, and reports waitlist mortality and follow-up times. The page also includes Kaplan–Meier curves illustrating waitlist survival patterns across subgroups. Click here to learn more: [Waitlist](page2.html).
+This page includes an additional dataset comprising all patients listed for transplant. It summarizes demographic and clinical characteristics of adults listed for liver transplantation with alcohol-related liver disease, comparing acute alcohol-related hepatitis and alcohol-related cirrhosis. It presents sex-stratified descriptive statistics, highlights differences in age, MELD score, and racial/ethnic distribution, and reports waitlist mortality and follow-up times. The page also includes Kaplan–Meier curves illustrating waitlist survival patterns across subgroups. Click here to learn more: [Waitlist](page2.html).
 
 ### Page 3
 Brief description of page3. 
