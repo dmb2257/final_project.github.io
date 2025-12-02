@@ -18,10 +18,10 @@ library(gtsummary)
 library(gt)
 ```
 
-```{r load-data, echo=FALSE, warning=FALSE, message=FALSE}
+```{r load-data, echo=FALSE, warning=FALSE, message=FALSE, results='hide'}
 # Load both files
-liver_data <- read_sas("../data/tx_li.sas7bdat")
-cand_liin <- read_sas("../data/cand_liin.sas7bdat")
+liver_data <- read_sas("data/tx_li.sas7bdat")
+cand_liin <- read_sas("data/cand_liin.sas7bdat")
 
 # Extract only needed variables from tx_li (person-level death and transplant dates)
 tx_data_slim <- liver_data %>%
@@ -70,15 +70,10 @@ waitlist_data <- cand_liin %>%
     # Combine death dates (use most complete)
     death_date = coalesce(can_death_date, tfl_death_date)
   )
-
-cat("Merged dataset:", nrow(waitlist_data), "candidate records\n")
-cat("Variables kept:", ncol(waitlist_data), "\n")
-cat("Death dates available:", sum(!is.na(waitlist_data$death_date)), "\n")
-cat("Transplant dates available:", sum(!is.na(waitlist_data$first_tx_date)), "\n")
 ```
 
 
-```{r prepare-data, echo=FALSE, warning=FALSE, message=FALSE}
+```{r prepare-data, echo=FALSE, warning=FALSE, message=FALSE, results='hide'}
 # Function to identify alcohol-related liver disease
 is_alcohol_related <- function(can_dgn, can_dgn2) {
   alcohol_codes <- c(4215, 4216, 4217)  # All alcohol-related codes
@@ -124,10 +119,9 @@ waitlist_cohort <- waitlist_data %>%
   ungroup() %>%
   filter(ALD_at_listing == TRUE)
 
-cat("Waitlist cohort with ALD (2020+):", nrow(waitlist_cohort), "patients\n")
 ```
 
-```{r create-cohort, echo=FALSE, warning=FALSE, message=FALSE}
+```{r create-cohort, echo=FALSE, warning=FALSE, message=FALSE, results='hide'}
 # Define waitlist mortality outcomes
 waitlist_survival <- waitlist_cohort %>%
   mutate(
@@ -168,13 +162,9 @@ waitlist_survival <- waitlist_cohort %>%
     !is.na(age_at_listing)
   )
 
-cat("\n=== OUTCOMES SUMMARY ===\n")
-cat("Final cohort:", nrow(waitlist_survival), "patients\n")
-cat("Waitlist deaths:", sum(waitlist_survival$waitlist_death, na.rm = TRUE), "\n")
-cat("Death rate:", round(mean(waitlist_survival$waitlist_death, na.rm = TRUE) * 100, 1), "%\n\n")
 
 # Detailed breakdown of outcomes
-cat("=== Outcome Categories ===\n")
+
 outcome_summary <- waitlist_survival %>%
   summarise(
     Total = n(),
@@ -183,10 +173,10 @@ outcome_summary <- waitlist_survival %>%
     Removed_Other = sum(is.na(first_tx_date) & waitlist_death == 0 & !is.na(removal_date)),
     Still_Listed = sum(is.na(first_tx_date) & is.na(removal_date) & waitlist_death == 0)
   )
-print(outcome_summary)
+outcome_summary
 
 # By sex
-cat("\n=== Waitlist Mortality by Sex ===\n")
+
 sex_mortality <- waitlist_survival %>%
   group_by(sex) %>%
   summarise(
@@ -197,10 +187,9 @@ sex_mortality <- waitlist_survival %>%
     Median_Age = median(age_at_listing, na.rm = TRUE),
     Median_Followup_Years = round(median(followup_years, na.rm = TRUE), 2)
   )
-print(sex_mortality)
+sex_mortality
 
 # Distribution of removal codes
-cat("\n=== Removal Codes ===\n")
 removal_codes <- waitlist_survival %>%
   count(CAN_REM_CD, sort = TRUE) %>%
   mutate(
@@ -218,13 +207,12 @@ removal_codes <- waitlist_survival %>%
       TRUE ~ as.character(CAN_REM_CD)
     )
   )
-print(removal_codes)
-
+removal_codes
 ```
 
 
-# Break it down by ALD etiology
-```{r, echo=FALSE, warning=FALSE, message=FALSE}
+## Characteristics by ALD etiology
+```{r, echo=FALSE, warning=FALSE, message=FALSE, results='hide'}
 # Create diagnosis subgroups
 waitlist_survival <- waitlist_survival %>%
   mutate(
@@ -242,14 +230,9 @@ waitlist_survival <- waitlist_survival %>%
     )
   )
 
-cat("=== DIAGNOSIS DISTRIBUTION ===\n")
-table(waitlist_survival$alcohol_subtype)
-cat("\n")
-table(waitlist_survival$alcohol_detailed)
 ```
-```{r,echo=FALSE, warning=FALSE, message=FALSE}
-cat("\n=== BASELINE CHARACTERISTICS BY DIAGNOSIS SUBTYPE ===\n\n")
 
+```{r,echo=FALSE, warning=FALSE, message=FALSE, results='hide'}
 # Summary by diagnosis subtype and sex
 subtype_summary <- waitlist_survival %>%
   group_by(alcohol_subtype, sex) %>%
@@ -264,10 +247,10 @@ subtype_summary <- waitlist_survival %>%
   ) %>%
   arrange(alcohol_subtype, sex)
 
-print(subtype_summary)
+subtype_summary
 
 # Detailed breakdown
-cat("\n=== DETAILED DIAGNOSIS BREAKDOWN ===\n")
+
 detailed_summary <- waitlist_survival %>%
   group_by(alcohol_detailed, sex) %>%
   summarise(
@@ -280,8 +263,9 @@ detailed_summary <- waitlist_survival %>%
   ) %>%
   arrange(alcohol_detailed, sex)
 
-print(detailed_summary)
+detailed_summary
 ```
+
 ```{r, echo=FALSE, warning=FALSE, message=FALSE}
 # Create comprehensive Table 1 stratified by diagnosis subtype
 table1_subtype <- waitlist_survival %>%
@@ -310,8 +294,9 @@ table1_subtype <- waitlist_survival %>%
 table1_subtype
 ```
 
+## Descriptive Tables of ALD-Etiologies Stratified by Sex
 ```{r, echo=FALSE, warning=FALSE, message=FALSE}
-# Create Table stratified by sex (overall)
+# Create Tables stratified by sex (overall)
 table_by_sex <- waitlist_survival %>%
   filter(alcohol_subtype != "Other") %>%
   select(sex, age_at_listing, meld_clean, race_eth, alcohol_subtype,
@@ -341,7 +326,6 @@ table_by_sex <- waitlist_survival %>%
 table_by_sex
 
 # Create separate tables by diagnosis subtype, stratified by sex
-cat("\n=== ALCOHOL-RELATED CIRRHOSIS: BY SEX ===\n")
 table_cirrhosis_sex <- waitlist_survival %>%
   filter(alcohol_subtype == "Alcohol-related Cirrhosis") %>%
   select(sex, age_at_listing, meld_clean, race_eth, 
@@ -370,7 +354,7 @@ table_cirrhosis_sex <- waitlist_survival %>%
 
 table_cirrhosis_sex
 
-cat("\n=== ACUTE ALCOHOL-RELATED HEPATITIS: BY SEX ===\n")
+
 table_aah_sex <- waitlist_survival %>%
   filter(alcohol_subtype == "Acute Alcohol-related Hepatitis") %>%
   select(sex, age_at_listing, meld_clean, race_eth, 
@@ -401,6 +385,7 @@ table_aah_sex
 ```
 
 
+## Kaplan-Meier curves of Waitlist Mortality
 ```{r, echo=FALSE, warning=FALSE, message=FALSE}
 # Kaplan-Meier curves: Alcohol-related Cirrhosis by Sex
 cirrhosis_data <- waitlist_survival %>%
@@ -423,13 +408,7 @@ if(nrow(cirrhosis_data) > 0 && sum(cirrhosis_data$waitlist_death) >= 5) {
     ggtheme = theme_bw()
   )
   
-  print(p_cirrhosis)
-  
-  cat("\n=== Alcohol-related Cirrhosis Survival Summary ===\n")
-  cat("Total N:", nrow(cirrhosis_data), "\n")
-  cat("Deaths:", sum(cirrhosis_data$waitlist_death), "\n")
-  cat("Male deaths:", sum(cirrhosis_data$waitlist_death[cirrhosis_data$sex == "Male"]), "\n")
-  cat("Female deaths:", sum(cirrhosis_data$waitlist_death[cirrhosis_data$sex == "Female"]), "\n")
+  p_cirrhosis
 }
 ```
 
@@ -455,23 +434,12 @@ if(nrow(aah_data) > 0 && sum(aah_data$waitlist_death) >= 5) {
     ggtheme = theme_bw()
   )
   
-  print(p_aah)
+  p_aah
   
-  cat("\n=== Acute Alcohol-related Hepatitis Survival Summary ===\n")
-  cat("Total N:", nrow(aah_data), "\n")
-  cat("Deaths:", sum(aah_data$waitlist_death), "\n")
-  cat("Male deaths:", sum(aah_data$waitlist_death[aah_data$sex == "Male"]), "\n")
-  cat("Female deaths:", sum(aah_data$waitlist_death[aah_data$sex == "Female"]), "\n")
-} else {
-  cat("\n=== Acute Alcohol-related Hepatitis ===\n")
-  cat("Insufficient events for survival analysis (N =", nrow(aah_data), 
-      ", Deaths =", sum(aah_data$waitlist_death), ")\n")
 }
 ```
 
 ```{r, echo=FALSE, warning=FALSE, message=FALSE}
-cat("\n=== COX REGRESSION: ALCOHOL-RELATED CIRRHOSIS ===\n\n")
-
 # Multivariable Cox for Alcohol-related Cirrhosis
 if(nrow(cirrhosis_data) > 0 && sum(cirrhosis_data$waitlist_death) >= 10) {
   cox_cirrhosis <- coxph(
@@ -489,22 +457,14 @@ if(nrow(cirrhosis_data) > 0 && sum(cirrhosis_data$waitlist_death) >= 10) {
       )
     )
   
-  print(cirrhosis_results)
+  cirrhosis_results
   
   # Extract key result
   coef_sex <- summary(cox_cirrhosis)$coefficients["sexFemale", ]
   hr_sex <- exp(coef_sex["coef"])
   ci_lower <- exp(coef_sex["coef"] - 1.96 * coef_sex["se(coef)"])
   ci_upper <- exp(coef_sex["coef"] + 1.96 * coef_sex["se(coef)"])
-  
-  cat(sprintf("\n**Alcohol-related Cirrhosis - Female vs Male:**\n"))
-  cat(sprintf("  Adjusted HR: %.2f (95%% CI: %.2f-%.2f, p=%.4f)\n",
-              hr_sex, ci_lower, ci_upper, coef_sex["Pr(>|z|)"]))
-} else {
-  cat("Insufficient events for Cox regression\n")
-}
-
-cat("\n\n=== COX REGRESSION: ACUTE ALCOHOL-related HEPATITIS ===\n\n")
+}  # <- Added missing closing brace
 
 # Multivariable Cox for Acute Alcohol-related Hepatitis
 if(nrow(aah_data) > 0 && sum(aah_data$waitlist_death) >= 10) {
@@ -523,20 +483,13 @@ if(nrow(aah_data) > 0 && sum(aah_data$waitlist_death) >= 10) {
       )
     )
   
-  print(aah_results)
+  aah_results
   
   # Extract key result
   coef_sex_aah <- summary(cox_aah)$coefficients["sexFemale", ]
   hr_sex_aah <- exp(coef_sex_aah["coef"])
   ci_lower_aah <- exp(coef_sex_aah["coef"] - 1.96 * coef_sex_aah["se(coef)"])
   ci_upper_aah <- exp(coef_sex_aah["coef"] + 1.96 * coef_sex_aah["se(coef)"])
-  
-  cat(sprintf("\n**Acute Alcohol-related Hepatitis - Female vs Male:**\n"))
-  cat(sprintf("  Adjusted HR: %.2f (95%% CI: %.2f-%.2f, p=%.4f)\n",
-              hr_sex_aah, ci_lower_aah, ci_upper_aah, coef_sex_aah["Pr(>|z|)"]))
-} else {
-  cat("Insufficient events for Cox regression\n")
-  cat("N =", nrow(aah_data), ", Deaths =", sum(aah_data$waitlist_death), "\n")
 }
 ```
 
