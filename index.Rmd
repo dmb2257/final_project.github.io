@@ -9,9 +9,11 @@ output:
 # Liver Transplants
 Liver transplantation is a life-saving therapy for patients with end-stage liver disease, and Alcohol-Associated Liver Disease (ALD) has become one of its leading indications in the United States. As ALD-related morbidity and mortality continue to rise, understanding patterns in transplant access, candidate characteristics, and post-transplant outcomes has become increasingly important.
 
-Our project uses data from theh SRTR database that collects data from transplant programs, including the United Network for Organ Sharing (UNOS). It includes a national registry that captures detailed information on all transplant candidates, recipients, and donors in the U.S. The dataset includes demographic variables, clinical severity measures, transplant events, and outcomes, allowing for comprehensive evaluation of the transplant landscape. SRTR make all data available to the public while honoring patient privacy. The data dictionary with all available variables can be found [here](https://www.srtr.org/requesting-srtr-data/saf-data-dictionary/).
+Our project utilizes data from the Scientific Registry of Transplant Recipients (SRTR), which compiles detailed information from transplant programs across the United States, including data collected through the United Network for Organ Sharing (UNOS). The SRTR serves as a national registry that captures comprehensive demographic, clinical, and outcome data on all transplant candidates, recipients, and donors. For this study, we restricted our cohort to adult patients (aged 18 years or older) who underwent transplantation from 2020 onward, reflecting recent shifts in clinical practice and the introduction of early liver transplantation for patients with severe alcohol-associated liver disease, particularly those presenting with acute alcoholic hepatitis.
 
-In this website, we provide an overview of key aspects of liver transplantation with a focus on ALD, highlighting trends in candidate demographics, transplant rates, and post-transplant outcomes. Our goal is to offer an accessible, data-driven perspective on the evolving role of ALD in liver transplantation.
+SRTR make all data available to the public while honoring patient privacy. The data dictionary with all available variables can be found [here](https://www.srtr.org/requesting-srtr-data/saf-data-dictionary/).
+
+In this website, we provide an overview of key aspects of liver transplantation. Each link has a different focus of liver transplantation, highlighting trends in candidate demographics, donor demographics, transplant rates, and post-transplant outcomes. Our goal is to offer an accessible, data-driven perspective on the evolving role of ALD in liver transplantation.
 
 ## Subsection 1
 text/code
