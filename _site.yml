@@ -16,7 +16,7 @@ navbar:
     - icon: fa-envelope fa-lg
       href: mailto:<you@youremail.com>
     - icon: fa-github fa-lg
-      href: http://github.com/dmb2257/
+      href: https://github.com/elinastoffel/final_project.git
 output:
   html_document:
     theme: sandstone
