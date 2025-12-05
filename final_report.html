@@ -372,13 +372,11 @@ become one of its leading indications in the United States. As
 ALD-related morbidity and mortality continue to rise, understanding
 patterns in transplant access, candidate characteristics, and
 post-transplant outcomes has become increasingly important.</p>
-<p>Our project uses data from the SRTR database that collects data from
-transplant programs, including the United Network for Organ Sharing
-(UNOS). It includes a national registry that captures detailed
-information on all transplant candidates, recipients, and donors in the
-U.S. The dataset includes demographic variables, clinical severity
-measures, transplant events, and outcomes, allowing for comprehensive
-evaluation of the transplant landscape.</p>
+<p>In this website, we provide an overview of key aspects of liver
+transplantation with a focus on ALD, highlighting trends in candidate
+demographics, transplant rates, and post-transplant outcomes. Our goal
+is to offer an accessible, data-driven perspective on the evolving role
+of ALD in liver transplantation.</p>
 </div>
 <div id="related-work" class="section level2">
 <h2>Related Work</h2>
@@ -399,10 +397,15 @@ investigate changes in the transplant landscape over time. We focused on
 those listed with alcohol-related liver disease given the recent
 increases in alcohol use in the United States and given that it is now
 the leading indication for liver transplantation. We decided to break
-down the questions we asked into 3 key questions: 1. What are some of
-the outcomes when placed on the waitlist for an organ? 2. What are some
-of the characteristics of the organ recipients? 3. What are some of the
-characteristics of the organ donors?</p>
+down the questions we asked into 3 key questions:</p>
+<ol style="list-style-type: decimal">
+<li><p>What are some of the outcomes when placed on the waitlist for an
+organ?</p></li>
+<li><p>What are some of the characteristics of the organ
+recipients?</p></li>
+<li><p>What are some of the characteristics of the organ
+donors?</p></li>
+</ol>
 </div>
 <div id="evolution-of-questions" class="section level2">
 <h2>Evolution of Questions</h2>
@@ -414,26 +417,35 @@ characteristics of the organ donors?</p>
 </div>
 <div id="data" class="section level2">
 <h2>Data</h2>
-<p>We used two of the large datafiles available: -
-<code>CAND_LIIN</code> includes persons who are registered on the OPTN
-waiting list and presents information about candidates during the time
-they are waiting to receive an organ. - <code>TX_LI</code> includes
-characteristics of the patient at the time of transplant and the
-transplant operation itself.</p>
+<p>We used two of the large datafiles available:</p>
+<ul>
+<li><p><code>CAND_LIIN</code> includes persons who are registered on the
+OPTN waiting list and presents information about candidates during the
+time they are waiting to receive an organ.</p></li>
+<li><p><code>TX_LI</code> includes characteristics of the patient at the
+time of transplant and the transplant operation itself.</p></li>
+</ul>
 <p>The data was cleaned using RStudio/RMarkdown to meet the following
-criteria: - Every observation required a unique identifier
-(<code>PERS_ID</code>). - All patients had to be over the age of 18 age
+criteria:</p>
+<ul>
+<li><p>Every observation required a unique identifier
+(<code>PERS_ID</code>).</p></li>
+<li><p>All patients had to be over the age of 18 age
 (<code>CAN_AGE_AT_LISTING</code> and <code>REC_AGE_AT_TX</code> &gt;=
-18) - Dates must be saved in correct date format
-(<code>REC_TX_DT</code>, <code>CAN_LISTING_DT</code>) - Only patients
-with an alcohol-related diagnosis code were included. Those with
-alcohol-related cirrhosis had <code>CAN_DGN</code> 4215, 4216 and those
-with acute-alcohol related hepatitis had <code>CAN_DGN</code> 4217. -
-Evaluation or transplant should have occurred after the year 2020. We
-chose this time cut off because this is when liver transplants for a
-severe form of alcohol-related liver disease termed alcohol-related
-hepatitis, were first introduced. (<code>REC_TX_DT</code>,
-<code>CAN_LISTING_DT</code> &gt;= 2020).</p>
+18)</p></li>
+<li><p>Dates must be saved in correct date format
+(<code>REC_TX_DT</code>, <code>CAN_LISTING_DT</code>)</p></li>
+<li><p>Only patients with an alcohol-related diagnosis code were
+included. Those with alcohol-related cirrhosis had <code>CAN_DGN</code>
+4215, 4216 and those with acute-alcohol related hepatitis had
+<code>CAN_DGN</code> 4217.</p></li>
+<li><p>Evaluation or transplant should have occurred after the year
+2020. We chose this time cut off because this is when liver transplants
+for a severe form of alcohol-related liver disease termed
+alcohol-related hepatitis, were first introduced.
+(<code>REC_TX_DT</code>, <code>CAN_LISTING_DT</code> &gt;=
+2020).</p></li>
+</ul>
 </div>
 <div id="exploratory-analysis" class="section level2">
 <h2>Exploratory Analysis</h2>
@@ -441,15 +453,24 @@ hepatitis, were first introduced. (<code>REC_TX_DT</code>,
 Justify the steps you took, and show any major changes to your
 ideas.text here</p>
 </div>
-<div id="additional-analysis" class="section level2">
-<h2>Additional Analysis</h2>
-<p>If you undertake formal statistical analyses, describe these in
-detail</p>
+<div id="limitations" class="section level2">
+<h2>Limitations</h2>
+<ul>
+<li>Limited social determinants and social factors are captured</li>
+<li>Some of the data is incomplete</li>
+</ul>
 </div>
 <div id="discussion" class="section level2">
 <h2>Discussion</h2>
 <p>What were your findings? Are they what you expect? What insights into
 the data can you make?</p>
+<p>The ALD cohort shows demographic and clinical differences by sex,
+with women listed at younger ages and with slightly higher MELD scores,
+particularly in alcohol-related cirrhosis. Despite these baseline
+differences, waitlist mortality did not differ between men and women in
+either cirrhosis or acute alcohol-related hepatitis. This suggests that
+sex-based disparities in disease severity at listing do not translate
+into short-term differences in mortality risk after listing.</p>
 </div>
 
 
