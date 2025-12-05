@@ -1,22 +1,186 @@
 ---
-title: "Page 1"
+title: "Recipient Outcomes by the Types of Donors"
 output: 
   html_document:
     toc: true
     toc_float: true
 ---
 
-Diane's Workspace
 
-# Header
-text here 
+# Recipient Patient Outcomes Based on Donor Type
+## Load Packages and Dataset
+```{r}
+library(tidyverse)
+library(haven)
+library(arsenal)
+```
 
-## Subsection 1
-text/code here
+```{r}
+#Loads the Liver file
+liver_data <- 
+  read_sas("../../github/tx_li.sas7bdat")
+```
 
-## Subsection 2
-text/code here
 
+## Data Cleaning
+
+This code chunk cleans the original liver dataset to create a consistent and tidy dataframe. This dataframe formats the date variables, identifies alcohol subtypes.  It also filters the data for years from 2020, for recipients 18 years and older, and omits the alcohol subtype "Other". 
+```{r}
+# This cleans the data and identifies alcohol subtypes
+
+tidy_liver_df=
+  liver_data|>
+  mutate(tx_date = as_date(REC_TX_DT),
+         listing_date = as_date(CAN_LISTING_DT),
+         tx_year = year(tx_date),
+         days_listed = as.numeric(difftime(tx_date, listing_date, units = "days")),
+         alcohol_subtype = case_when(CAN_DGN%in% c(4215, 4216) | CAN_DGN2 %in% c(4215, 4216) ~ "Alcohol-related Cirrhosis",
+                                     CAN_DGN == 4217 | CAN_DGN2 == 4217 ~"Acute Alcohol-related Hepatitis",
+                                     TRUE ~ "Other"))%>%
+  
+# This filters the data for years from 2020, for recipients 18 years and older, and omits the alcohol subtype "Other"
+  
+  filter(!is.na(PERS_ID) & !is.na(tx_date) & tx_year >= 2020 & REC_AGE_AT_TX>= 18, alcohol_subtype !="Other")|>
+  arrange(PERS_ID, tx_date)|>
+  janitor::clean_names()
+```
+
+# Patient Status 
+This code chunk creates the pt_status_df, which includes recipient patient follow up information, the type of donor, and whether or not liver transplant was a multi-organ transplant. 
+```{r}
+# This creates a dataframe to observe patient status, donor types, and multi-organ transplants
+
+pt_status_df = 
+  tidy_liver_df |>
+  select(pers_id, don_ty, tx_date, rec_age_at_tx, rec_px_stat, rec_px_stat_dt, rec_tx_org_ty, alcohol_subtype, rec_cur_px_stat, tfl_lastatus, tfl_lafudate, tfl_graft_dt)|>
+  mutate(don_ty = case_match(
+           don_ty, 
+              "C" ~ "Deceased Donor",
+              "L" ~ "Living Donor"),
+         tx_date = as.Date(tx_date),
+         rec_px_stat= case_match(
+            rec_px_stat,
+              "A" ~ "Living",
+              "R" ~ "Retransplanted",
+              "D" ~ "Dead",
+              "L" ~ "Lost",
+              "U" ~ "Unknown",
+              "X" ~ "Natural Disaster"),
+         rec_cur_px_stat = case_match(
+           rec_cur_px_stat,
+            "A" ~ "Alive",
+            "D" ~ "Dead",
+            "F" ~ "Graft Failure: 1YR after graft failure",
+            "G" ~ "Graft Failure: graft failure",
+            "L" ~ "Lost",
+            "R" ~ "Retransplanted",
+            "S" ~ "Graft Failure: 2YR after graft failure"
+         ))|>
+    filter(rec_tx_org_ty %in% c("LI", "KI LI 2LD", "KI LI", "KI LI IN", "KI LU", "KP LI", "KP LI IN", "LI HL", "LI HR", "LI IN", "LI LU", "PA LI", "PA LI IN", "PA LI LU"))|>
+    mutate(
+      multi_organ =as.factor(rec_tx_org_ty != "LI"))|>
+      mutate(
+    days_to_lafollow = as.numeric(difftime(tfl_lafudate, tx_date, units = "days")),
+    days_to_follow = as.numeric(difftime(rec_px_stat_dt, tx_date, units = "days")),
+    days_to_fail = as.numeric(difftime(tfl_graft_dt, tx_date, unit = "days")),
+    failed_graft = !is.na(tfl_graft_dt))
+
+```
+
+## Frequency Table and Column Chart of Donor Types
+
+This code chunk creates a frequency table and column chart for the living vs deceased donor types. 
+```{r}
+pt_status_df|>
+  group_by(don_ty)|>
+  summarize(frequency = n_distinct(pers_id))|>
+  knitr::kable()
+
+pt_status_df|>
+  group_by(don_ty)|>
+  summarize(frequency = n_distinct(pers_id))|>
+  ggplot()+
+  geom_col(aes(don_ty, frequency, fill = don_ty, position = "dodge"))+
+  labs(
+    title = "Frequency of Living vs Diseased Liver Donors",
+    x = "Donor Type",
+    y = "Frequency"
+  )+
+  theme(axis.text.x = element_text(angle = 65, hjust = 1))
+
+pt_status_df|>
+  group_by(don_ty, rec_age_at_tx)|>
+  summarize(frequency = n())|>
+  ggplot()+
+    geom_col(aes(x= rec_age_at_tx, y = frequency, fill = don_ty), position = "dodge")+
+    labs(
+    title = "Frequency of Donor Types by Age of Recipient",
+    x = "Age of Recipient",
+    y = "Frequency of Donor Type"
+  )
+```
+
+
+# Subsample of Graft Failures
+This code chunk creates a dataframe that includes information only for patients who experienced a graft failure.
+```{r}
+graft_failures =
+pt_status_df|>
+  filter(failed_graft == "TRUE")
+```
+
+## Frequency Table of Graft Failure by Donor Type and Histogram of Time to Failure
+```{r}
+graft_failures|>
+  group_by(don_ty)|>
+  summarize(failure_freq = n())|>
+  knitr::kable()
+
+graft_failures|>
+  group_by(pers_id)|>
+  ggplot()+
+  geom_boxplot(aes(don_ty, days_to_fail, fill = don_ty))+
+  labs(
+    title = "Time Between Transplant to Graft Failure by Donor Type",
+    x = "Donor Type",
+    y = "Time Between Transplant to Graft Failure (days)"
+  )+
+  theme(axis.text.x = element_text(angle = 65, hjust = 1))
+
+```
+
+# Multi-Organ Transplants and Donor Types 
+## Frequency Table of Multi-Organ Transplants by Donor Type and Column Chart of Frequencies
+```{r}
+graft_failures|>
+  group_by(multi_organ, don_ty)|>
+  summarize(frequency = n())|>
+  knitr::kable()
+
+pt_status_df|>
+  group_by(don_ty, multi_organ)|>
+  summarize(frequency = n())|>
+  ggplot()+
+  geom_col(aes(multi_organ, frequency, fill = don_ty, position = "dodge"))+
+  labs(
+    title = "Frequency of Living vs Deceased Liver Donors",
+    x = "Multiple Organ Tranplant",
+    y = "Frequency"
+  )+
+  theme(axis.text.x = element_text(angle = 65, hjust = 1))
+```
+
+## Summary Table
+This code chunk produces a summary table of the incidence of graft failure by donor type and whether or not the patient recieved a multi-organ transplant. We are interested in observing the relationship between donor type and graft failures,  adjusting for multi organ transplants.
+```{r results = "asis"}
+mylabels1<-
+  list(failed_graft = "Graft Failure", don_ty = "Donor Type", multi_organ = "Multi Organ Transplant")
+
+table1<- 
+tableby(failed_graft ~ don_ty + multi_organ, data = pt_status_df)
+
+summary(table1, labelTranslations = mylabels1, pfootnote = TRUE)
+```
 
 
 
