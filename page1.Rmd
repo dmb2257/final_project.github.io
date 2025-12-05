@@ -10,7 +10,7 @@ output:
 
 # Comparing Liver Transplants by Donor Type
 
-This page explores the relationship between the type of donor and the recipient patient outcomes. The donor type was defined by the variable `DON_TY` and identifies whether the patient received a transplant from a deceased donor or from a living donor. The recipient patient outcomes observed were the incidence of graft failures and recipient patient status at the last follow up. 
+This page explores the relationship between the type of donor and the recipient patient outcomes. The donor type was defined by the variable `DON_TY` and identifies whether the patient received a transplant from a deceased donor or from a living donor. The recipient patient outcomes observed were graft failure and recipient patient status at the last follow up. Additional variables were also created to assess the patient outcomes, such as `failed_graft` and `date_to_fail`.
 
 ```{r message = FALSE, warning=FALSE}
 # Load Packages
@@ -24,8 +24,6 @@ library(kableExtra)
 liver_data <- 
   read_sas("../../github/tx_li.sas7bdat")
 ```
-
-The dataset was cleaned to create a sample of the ALD cohort, including only recipients with an alcohol subtype and were 21 years or older. The dataset was also filtered to only include data starting from 2020. Additional variables were also created to assess the patient outcomes, such as `failed_graft` and `date_to_fail`.
 
 ```{r message = FALSE}
 

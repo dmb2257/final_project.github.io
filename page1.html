@@ -339,7 +339,7 @@ div.tocify {
   <a href="page2.html">Waitlist Characteristics &amp; Mortality</a>
 </li>
 <li>
-  <a href="page3.html">Donor Demographics</a>
+  <a href="page3.html">Demographics</a>
 </li>
 <li>
   <a href="page4.html">Page 4</a>
@@ -385,8 +385,10 @@ class="section level1">
 recipient patient outcomes. The donor type was defined by the variable
 <code>DON_TY</code> and identifies whether the patient received a
 transplant from a deceased donor or from a living donor. The recipient
-patient outcomes observed were the incidence of graft failures and
-recipient patient status at the last follow up.</p>
+patient outcomes observed were graft failure and recipient patient
+status at the last follow up. Additional variables were also created to
+assess the patient outcomes, such as <code>failed_graft</code> and
+<code>date_to_fail</code>.</p>
 <pre class="r"><code># Load Packages
 
 library(tidyverse)
@@ -397,12 +399,6 @@ library(kableExtra)
 #Loads the Liver file
 liver_data &lt;- 
   read_sas(&quot;../../github/tx_li.sas7bdat&quot;)</code></pre>
-<p>The dataset was cleaned to create a sample of the ALD cohort,
-including only recipients with an alcohol subtype and were 21 years or
-older. The dataset was also filtered to only include data starting from
-2020. Additional variables were also created to assess the patient
-outcomes, such as <code>failed_graft</code> and
-<code>date_to_fail</code>.</p>
 <pre class="r"><code># This cleans the data and identifies alcohol subtypes
 
 tidy_liver_df=
