@@ -1,5 +1,5 @@
 ---
-title: "Donor Types of Liver Transplant Recipients"
+title: "Liver Transplants from Living vs Deceased Donors"
 output: 
   html_document:
     toc: true
@@ -98,7 +98,7 @@ pt_status_df =
 
 ## Frequency of Living and Deceased Donors
 
-```{r message = FALSE}
+```{r message = FALSE, warning = FALSE}
 
 # This code chunk creates a frequency table and column chart for the living vs deceased donor types. 
 

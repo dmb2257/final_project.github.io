@@ -11,7 +11,7 @@
 
 
 
-<title>Donor Types of Liver Transplant Recipients</title>
+<title>Liver Transplants from Living vs Deceased Donors</title>
 
 <script src="site_libs/header-attrs-2.29/header-attrs.js"></script>
 <script src="site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
@@ -331,10 +331,10 @@ div.tocify {
   <a href="final_report.html">Final Report</a>
 </li>
 <li>
-  <a href="page1.html">Page 1</a>
+  <a href="page1.html">Living vs Deceased Donors</a>
 </li>
 <li>
-  <a href="page2.html">Page 2</a>
+  <a href="page2.html">Waitlist Characteristics &amp; Mortality</a>
 </li>
 <li>
   <a href="page3.html">Page 3</a>
@@ -371,8 +371,8 @@ div.tocify {
 
 
 
-<h1 class="title toc-ignore">Donor Types of Liver Transplant
-Recipients</h1>
+<h1 class="title toc-ignore">Liver Transplants from Living vs Deceased
+Donors</h1>
 
 </div>
 
@@ -494,8 +494,6 @@ pt_status_df|&gt;
     y = &quot;Frequency&quot;
   )+
   theme(axis.text.x = element_text(angle = 65, hjust = 1))</code></pre>
-<pre><code>## Warning in geom_col(aes(don_ty, frequency, fill = don_ty, position = &quot;dodge&quot;)):
-## Ignoring unknown aesthetics: position</code></pre>
 <p><img src="page1_files/figure-html/unnamed-chunk-3-1.png" width="672" /></p>
 <pre class="r"><code>pt_status_df|&gt;
   group_by(don_ty, rec_age_at_tx)|&gt;
