@@ -109,7 +109,8 @@ pt_status_df|>
   labs(
     title = "Frequency of Living vs Diseased Liver Donors",
     x = "Donor Type",
-    y = "Frequency"
+    y = "Frequency",
+    fill = "Donor Type"
   )
 
 
