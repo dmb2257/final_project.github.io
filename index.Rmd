@@ -34,8 +34,14 @@ This page explores the relationship between the type of donor and the recipient 
 ## Waitlist Characteristics and Mortality
 This page summarizes demographic and clinical characteristics of adults listed for liver transplantation with alcohol-related liver disease, comparing acute alcohol-related hepatitis and alcohol-related cirrhosis. It presents sex-stratified descriptive statistics, highlights differences in age, MELD score, and racial/ethnic distribution, and reports waitlist mortality and follow-up times. The page also includes Kaplan–Meier curves illustrating waitlist survival patterns across subgroups. Click here to learn more: [Waitlist](page2.html).
 
+=======
+
+
 ## Donor and Recipient Characteristics
 This page explores the complex needs and demographic realities of liver transplantation in the United States. On this page we explore the race and age distribution of both donors (living and deceased) and recipients and how well race and age are matched between recipients and donors. As transplantation is the only cure for end-stage liver failure, by exploring donor and recipient characteristics side-by-side, we can better understand where disparities persist and identify opportunities to improve fairness in the transplant system. Click here to learn more: [Demographics](Demographics.html).
+
+=======
+
 
 ## Page 4 Title
 Brief description of [Olivia's Rmd](page4.html).

@@ -11,7 +11,7 @@ navbar:
       href: page2.html
     - text: "Demographics"
       href: page3.html
-    - text: "Page 4"
+    - text: "Donor Characteristics"
       href: page4.html
     - icon: fa-envelope fa-lg
       href: mailto:<you@youremail.com>
