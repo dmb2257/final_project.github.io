@@ -45,10 +45,11 @@ Demographic and clinical characteristics at listing—including age, MELD score,
 Kaplan–Meier curves were generated to compare waitlist survival between men and women. Each curve reflects time from listing to waitlist death, with censoring at transplant, administrative removal, or end of follow-up. Confidence bands depict uncertainty in the estimated survival probabilities, and log-rank testing evaluates whether survival differs by sex. These plots summarize the cumulative risk of waitlist mortality over time and highlight potential sex-based disparities.
 
 
-## Additional Analysis
-If you undertake formal statistical analyses, describe these in detail
+## Limitations
+- Limited social determinants and social factors are captured 
+- Some of the data is incomplete
 
 ## Discussion
 What were your findings? Are they what you expect? What insights into the data can you make?
 
-
+The ALD cohort shows demographic and clinical differences by sex, with women listed at younger ages and with slightly higher MELD scores, particularly in alcohol-related cirrhosis. Despite these baseline differences, waitlist mortality did not differ between men and women in either cirrhosis or acute alcohol-related hepatitis. This suggests that sex-based disparities in disease severity at listing do not translate into short-term differences in mortality risk after listing.
