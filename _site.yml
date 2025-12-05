@@ -7,7 +7,7 @@ navbar:
       href: final_report.html
     - text: "Transplants from Living vs Deceased Donors"
       href: page1.html
-    - text: "Page 2"
+    - text: "Waitlist Characteristics and Mortality"
       href: page2.html
     - text: "Page 3"
       href: page3.html
