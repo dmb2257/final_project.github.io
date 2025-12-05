@@ -33,6 +33,7 @@
 <link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
 <script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
 <script src="site_libs/navigation-1.1/tabsets.js"></script>
+<script src="site_libs/navigation-1.1/codefolding.js"></script>
 <link href="site_libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
 <script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
 <link href="site_libs/font-awesome-6.5.2/css/all.min.css" rel="stylesheet" />
@@ -221,6 +222,9 @@ $(document).ready(function () {
 </style>
 
 <!-- code folding -->
+<style type="text/css">
+.code-folding-btn { margin-bottom: 4px; }
+</style>
 
 
 
@@ -357,6 +361,14 @@ div.tocify {
 
 <div id="header">
 
+<div class="btn-group pull-right float-right">
+<button type="button" class="btn btn-default btn-xs btn-secondary btn-sm dropdown-toggle" data-toggle="dropdown" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span>Code</span> <span class="caret"></span></button>
+<ul class="dropdown-menu dropdown-menu-right" style="min-width: 50px;">
+<li><a id="rmd-show-all-code" href="#">Show All Code</a></li>
+<li><a id="rmd-hide-all-code" href="#">Hide All Code</a></li>
+</ul>
+</div>
+
 
 
 <h1 class="title toc-ignore">Donor Types of Liver Transplant
@@ -365,39 +377,17 @@ Recipients</h1>
 </div>
 
 
-<div id="liver-transplants-from-living-and-deceased-donors"
+<div id="comparing-liver-transplants-from-living-and-deceased-donors"
 class="section level1">
-<h1>Liver Transplants from Living and Deceased Donors</h1>
+<h1>Comparing Liver Transplants from Living and Deceased Donors</h1>
 <pre class="r"><code># Load Packages
 
-library(tidyverse)</code></pre>
-<pre><code>## ── Attaching core tidyverse packages ──────────────────────── tidyverse 2.0.0 ──
-## ✔ dplyr     1.1.4     ✔ readr     2.1.5
-## ✔ forcats   1.0.0     ✔ stringr   1.5.2
-## ✔ ggplot2   3.5.2     ✔ tibble    3.3.0
-## ✔ lubridate 1.9.4     ✔ tidyr     1.3.1
-## ✔ purrr     1.1.0     
-## ── Conflicts ────────────────────────────────────────── tidyverse_conflicts() ──
-## ✖ dplyr::filter() masks stats::filter()
-## ✖ dplyr::lag()    masks stats::lag()
-## ℹ Use the conflicted package (&lt;http://conflicted.r-lib.org/&gt;) to force all conflicts to become errors</code></pre>
-<pre class="r"><code>library(haven)
-library(arsenal)</code></pre>
-<pre><code>## 
-## Attaching package: &#39;arsenal&#39;
-## 
-## The following object is masked from &#39;package:lubridate&#39;:
-## 
-##     is.Date</code></pre>
-<pre class="r"><code>library(kableExtra)</code></pre>
-<pre><code>## Warning: package &#39;kableExtra&#39; was built under R version 4.5.2</code></pre>
-<pre><code>## 
-## Attaching package: &#39;kableExtra&#39;
-## 
-## The following object is masked from &#39;package:dplyr&#39;:
-## 
-##     group_rows</code></pre>
-<pre class="r"><code>#Loads the Liver file
+library(tidyverse)
+library(haven)
+library(arsenal)
+library(kableExtra)
+
+#Loads the Liver file
 liver_data &lt;- 
   read_sas(&quot;../../github/tx_li.sas7bdat&quot;)</code></pre>
 <pre class="r"><code># This code chunk cleans the original liver dataset to create a consistent and tidy dataframe. This dataframe formats the date variables, identifies alcohol subtypes.  It also filters the data for years from 2020, for recipients 18 years and older, and omits the alcohol subtype &quot;Other&quot;. 
@@ -418,8 +408,11 @@ tidy_liver_df=
   
   filter(!is.na(PERS_ID) &amp; !is.na(tx_date) &amp; tx_year &gt;= 2020 &amp; REC_AGE_AT_TX&gt;= 18, alcohol_subtype !=&quot;Other&quot;)|&gt;
   arrange(PERS_ID, tx_date)|&gt;
-  janitor::clean_names()</code></pre>
-<pre class="r"><code># This creates a dataframe to observe patient status, donor types, and multi-organ transplants
+  janitor::clean_names()
+
+
+
+# This creates a dataframe to observe patient status, donor types, and multi-organ transplants
 
 pt_status_df = 
   tidy_liver_df |&gt;
@@ -470,13 +463,13 @@ class="section level2">
 
 pt_status_df|&gt;
   group_by(don_ty)|&gt;
-  summarize(Fequency = n_distinct(pers_id))|&gt;
+  summarize(Frequency = n_distinct(pers_id))|&gt;
   knitr::kable()</code></pre>
 <table>
 <thead>
 <tr class="header">
 <th align="left">don_ty</th>
-<th align="right">Fequency</th>
+<th align="right">Frequency</th>
 </tr>
 </thead>
 <tbody>
@@ -503,7 +496,7 @@ pt_status_df|&gt;
   theme(axis.text.x = element_text(angle = 65, hjust = 1))</code></pre>
 <pre><code>## Warning in geom_col(aes(don_ty, frequency, fill = don_ty, position = &quot;dodge&quot;)):
 ## Ignoring unknown aesthetics: position</code></pre>
-<p><img src="page1_files/figure-html/unnamed-chunk-5-1.png" width="672" /></p>
+<p><img src="page1_files/figure-html/unnamed-chunk-3-1.png" width="672" /></p>
 <pre class="r"><code>pt_status_df|&gt;
   group_by(don_ty, rec_age_at_tx)|&gt;
   summarize(frequency = n())|&gt;
@@ -515,9 +508,12 @@ pt_status_df|&gt;
     y = &quot;Frequency of Donor Type&quot;,
     fill = &quot;Donor Type&quot;
   )</code></pre>
-<pre><code>## `summarise()` has grouped output by &#39;don_ty&#39;. You can override using the
-## `.groups` argument.</code></pre>
-<p><img src="page1_files/figure-html/unnamed-chunk-5-2.png" width="672" /></p>
+<p><img src="page1_files/figure-html/unnamed-chunk-3-2.png" width="672" />
+There is a significantly greater frequency of liver donations received
+from deceased organ donors, compared to living organ donors. The
+following analyses will contain a much greater sample of patients who
+received a transplant from a deceased donor than those who received a
+transplant froma living donor.</p>
 </div>
 <div id="graft-failures" class="section level2">
 <h2>Graft Failures</h2>
@@ -564,7 +560,7 @@ graft_failures|&gt;
     fill = &quot;Donor Type&quot;
   )+
   theme(axis.text.x = element_text(angle = 65, hjust = 1))</code></pre>
-<p><img src="page1_files/figure-html/unnamed-chunk-7-1.png" width="672" /></p>
+<p><img src="page1_files/figure-html/unnamed-chunk-5-1.png" width="672" /></p>
 </div>
 <div id="multi-organ-liver-transplants" class="section level2">
 <h2>Multi-Organ Liver Transplants</h2>
@@ -573,8 +569,6 @@ graft_failures|&gt;
   group_by(multi_organ, don_ty)|&gt;
   summarize(frequency = n())|&gt;
   knitr::kable()</code></pre>
-<pre><code>## `summarise()` has grouped output by &#39;multi_organ&#39;. You can override using the
-## `.groups` argument.</code></pre>
 <table>
 <thead>
 <tr class="header">
@@ -613,9 +607,7 @@ graft_failures|&gt;
     fill = &quot;Donor Type&quot;
   )+
   theme(axis.text.x = element_text(angle = 65, hjust = 1))</code></pre>
-<pre><code>## `summarise()` has grouped output by &#39;don_ty&#39;. You can override using the
-## `.groups` argument.</code></pre>
-<p><img src="page1_files/figure-html/unnamed-chunk-8-1.png" width="672" /></p>
+<p><img src="page1_files/figure-html/unnamed-chunk-6-1.png" width="672" /></p>
 <pre class="r"><code># Summary Table: This code chunk produces a summary table of the incidence of graft failure by donor type and whether or not the patient recieved a multi-organ transplant. We are interested in observing the relationship between donor type and graft failures,  adjusting for multi organ transplants.
 
 mylabels1&lt;-
@@ -711,7 +703,7 @@ pt_status_df|&gt;
     fill = &quot;Last Patient Status&quot;
   )+
   theme(axis.text.x = element_text(angle = 65, hjust = 1))</code></pre>
-<p><img src="page1_files/figure-html/unnamed-chunk-10-1.png" width="672" /></p>
+<p><img src="page1_files/figure-html/unnamed-chunk-8-1.png" width="672" /></p>
 </div>
 <div id="liver-received-from-living-donors" class="section level3">
 <h3>Liver Received from Living Donors</h3>
@@ -728,7 +720,7 @@ pt_status_df|&gt;
     fill = &quot;Last Patient Status&quot;
   )+
   theme(axis.text.x = element_text(angle = 65, hjust = 1))</code></pre>
-<p><img src="page1_files/figure-html/unnamed-chunk-11-1.png" width="672" /></p>
+<p><img src="page1_files/figure-html/unnamed-chunk-9-1.png" width="672" /></p>
 </div>
 </div>
 </div>
@@ -768,6 +760,11 @@ $(document).ready(function () {
 </script>
 
 <!-- code folding -->
+<script>
+$(document).ready(function () {
+  window.initializeCodeFolding("hide" === "show");
+});
+</script>
 
 <script>
 $(document).ready(function ()  {

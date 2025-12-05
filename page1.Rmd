@@ -4,28 +4,28 @@ output:
   html_document:
     toc: true
     toc_float: true
+    code_folding: hide
 ---
 
 
-# Liver Transplants from Living and Deceased Donors
+# Comparing Liver Transplants from Living and Deceased Donors
 
-```{r}
+```{r message = FALSE, warning=FALSE}
 # Load Packages
 
 library(tidyverse)
 library(haven)
 library(arsenal)
 library(kableExtra)
-```
 
-```{r}
 #Loads the Liver file
 liver_data <- 
   read_sas("../../github/tx_li.sas7bdat")
 ```
 
 
-```{r}
+
+```{r message = FALSE}
 # This code chunk cleans the original liver dataset to create a consistent and tidy dataframe. This dataframe formats the date variables, identifies alcohol subtypes.  It also filters the data for years from 2020, for recipients 18 years and older, and omits the alcohol subtype "Other". 
 
 # This cleans the data and identifies alcohol subtypes
@@ -45,10 +45,9 @@ tidy_liver_df=
   filter(!is.na(PERS_ID) & !is.na(tx_date) & tx_year >= 2020 & REC_AGE_AT_TX>= 18, alcohol_subtype !="Other")|>
   arrange(PERS_ID, tx_date)|>
   janitor::clean_names()
-```
 
 
-```{r}
+
 # This creates a dataframe to observe patient status, donor types, and multi-organ transplants
 
 pt_status_df = 
@@ -93,18 +92,20 @@ pt_status_df =
     days_to_fail = as.numeric(difftime(tfl_graft_dt, tx_date, unit = "days")),
     failed_graft = !is.na(tfl_graft_dt))
 
+
 ```
+
 
 ## Frequency of Living and Deceased Donors
 
-```{r}
+```{r message = FALSE}
 
 # This code chunk creates a frequency table and column chart for the living vs deceased donor types. 
 
 
 pt_status_df|>
   group_by(don_ty)|>
-  summarize(Fequency = n_distinct(pers_id))|>
+  summarize(Frequency = n_distinct(pers_id))|>
   knitr::kable()
 
 pt_status_df|>
@@ -131,10 +132,10 @@ pt_status_df|>
     fill = "Donor Type"
   )
 ```
-
+There is a significantly greater frequency of liver donations received from deceased organ donors, compared to living organ donors. The following analyses will contain a much greater sample of patients who received a transplant from a deceased donor than those who received a transplant froma living donor.
 
 ## Graft Failures
-```{r}
+```{r message = FALSE}
 # Subsample of Graft Failures: This code chunk creates a dataframe that includes information only for patients who experienced a graft failure.
 
 graft_failures =
@@ -143,7 +144,7 @@ pt_status_df|>
 ```
 
 
-```{r}
+```{r message = FALSE}
 # Frequency Table of Graft Failure by Donor Type and Histogram of Time to Failure
 
 graft_failures|>
@@ -169,7 +170,7 @@ graft_failures|>
 
 ## Multi-Organ Liver Transplants
 
-```{r}
+```{r message = FALSE}
 # Frequency Table of Multi-Organ Transplants by Donor Type and Column Chart of Frequencies
 graft_failures|>
   group_by(multi_organ, don_ty)|>
@@ -205,7 +206,7 @@ summary(table1, labelTranslations = mylabels1, pfootnote = TRUE)
 
 ## Recipient Patient Status at Last Follow Up
 ### Liver Received from Deceased Donors
-```{r}
+```{r message = FALSE}
 # Column chart of last patient status for those who recieved organ transplant from deceased donor
 pt_status_df|>
   filter(don_ty == "Deceased Donor")|>
@@ -225,7 +226,7 @@ pt_status_df|>
 ```
 
 ### Liver Received from Living Donors
-```{r}
+```{r message = FALSE}
 pt_status_df|>
   filter(don_ty == "Living Donor")|>
   group_by(tfl_lastatus)|>
