@@ -24,8 +24,8 @@ Olivia Martinez (om2372), and Diane Benites (dmb2257).
 Click below to watch our website screencast.
 
 <video width="640" controls>
-  <source src="Recording #10.mp4" type="video/mp4">
-
+  <source src="screencast.mp4" type="video/mp4">
+</video>
 
 
 ## Recipent Patient Outcomes by the Type of Donor
