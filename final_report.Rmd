@@ -39,7 +39,11 @@ The data was cleaned using RStudio/RMarkdown to meet the following criteria:
 - Evaluation or transplant should have occurred after the year 2020. We chose this time cut off because this is when liver transplants for a severe form of alcohol-related liver disease termed alcohol-related hepatitis, were first introduced. (`REC_TX_DT`, `CAN_LISTING_DT` >= 2020).
 
 ## Exploratory Analysis
-Visualizations, summaries, and exploratory statistical analyses. Justify the steps you took, and show any major changes to your ideas.text here 
+Demographic and clinical characteristics at listing—including age, MELD score, race/ethnicity, and diagnostic subtype—were summarized overall and stratified by sex. Additional subgroup tables describe individuals separately with alcohol-related cirrhosis and acute alcohol-related hepatitis. Continuous variables are reported using medians and interquartile ranges, and categorical variables using frequencies and percentages. These tables illustrate differences in listing severity, demographic composition, and raw waitlist mortality across clinical subgroups. Group comparisons in descriptive tables were assessed using non-parametric tests for continuous variables and χ²-based methods for categorical variables, with p-values provided to summarize evidence of between-group differences. T
+
+
+Kaplan–Meier curves were generated to compare waitlist survival between men and women. Each curve reflects time from listing to waitlist death, with censoring at transplant, administrative removal, or end of follow-up. Confidence bands depict uncertainty in the estimated survival probabilities, and log-rank testing evaluates whether survival differs by sex. These plots summarize the cumulative risk of waitlist mortality over time and highlight potential sex-based disparities.
+
 
 ## Additional Analysis
 If you undertake formal statistical analyses, describe these in detail
