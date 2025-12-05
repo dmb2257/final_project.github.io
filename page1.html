@@ -442,6 +442,13 @@ pt_status_df =
               &quot;L&quot; ~ &quot;Lost&quot;,
               &quot;U&quot; ~ &quot;Unknown&quot;,
               &quot;X&quot; ~ &quot;Natural Disaster&quot;),
+          tfl_lastatus= case_match(
+            tfl_lastatus,
+              &quot;A&quot; ~ &quot;Living&quot;,
+              &quot;R&quot; ~ &quot;Retransplanted&quot;,
+              &quot;D&quot; ~ &quot;Dead&quot;,
+              &quot;L&quot; ~ &quot;Lost to Follow Up&quot;,
+              &quot;N&quot; ~ &quot;Not Seen&quot;),
          rec_cur_px_stat = case_match(
            rec_cur_px_stat,
             &quot;A&quot; ~ &quot;Alive&quot;,
@@ -606,8 +613,8 @@ Chart of Frequencies</h2>
 <pre class="r"><code>pt_status_df|&gt;
   group_by(don_ty, multi_organ)|&gt;
   summarize(frequency = n())|&gt;
-  ggplot()+
-  geom_col(aes(multi_organ, frequency, fill = don_ty, position = &quot;dodge&quot;))+
+  ggplot(aes(multi_organ, frequency, fill = don_ty))+
+  geom_col(position = &quot;dodge&quot;)+
   labs(
     title = &quot;Frequency of Living vs Deceased Liver Donors&quot;,
     x = &quot;Multiple Organ Tranplant&quot;,
@@ -616,8 +623,6 @@ Chart of Frequencies</h2>
   theme(axis.text.x = element_text(angle = 65, hjust = 1))</code></pre>
 <pre><code>## `summarise()` has grouped output by &#39;don_ty&#39;. You can override using the
 ## `.groups` argument.</code></pre>
-<pre><code>## Warning in geom_col(aes(multi_organ, frequency, fill = don_ty, position =
-## &quot;dodge&quot;)): Ignoring unknown aesthetics: position</code></pre>
 <p><img src="page1_files/figure-html/unnamed-chunk-8-1.png" width="672" /></p>
 </div>
 <div id="summary-table" class="section level2">
@@ -700,6 +705,24 @@ summary(table1, labelTranslations = mylabels1, pfootnote = TRUE)</code></pre>
 <li>Pearson’s Chi-squared test</li>
 </ol>
 </div>
+</div>
+<div id="status-at-last-follow-up" class="section level1">
+<h1>Status at Last Follow Up</h1>
+<pre class="r"><code>pt_status_df|&gt;
+  filter(don_ty == &quot;Deceased Donor&quot;)|&gt;
+  group_by(tfl_lastatus)|&gt;
+  summarize(frequency = n())|&gt;
+  drop_na()|&gt;
+  ggplot(aes(x = tfl_lastatus, y = frequency, fill = tfl_lastatus))+
+  geom_col(position = &quot;dodge&quot;)</code></pre>
+<p><img src="page1_files/figure-html/unnamed-chunk-10-1.png" width="672" /></p>
+<pre class="r"><code>pt_status_df|&gt;
+  filter(don_ty == &quot;Living Donor&quot;)|&gt;
+  group_by(tfl_lastatus)|&gt;
+  summarize(frequency = n())|&gt;
+  ggplot(aes(x = tfl_lastatus, y = frequency,  fill = tfl_lastatus))+
+  geom_col(position = &quot;dodge&quot;)</code></pre>
+<p><img src="page1_files/figure-html/unnamed-chunk-11-1.png" width="672" /></p>
 </div>
 
 

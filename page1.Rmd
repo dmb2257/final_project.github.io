@@ -66,6 +66,13 @@ pt_status_df =
               "L" ~ "Lost",
               "U" ~ "Unknown",
               "X" ~ "Natural Disaster"),
+          tfl_lastatus= case_match(
+            tfl_lastatus,
+              "A" ~ "Living",
+              "R" ~ "Retransplanted",
+              "D" ~ "Dead",
+              "L" ~ "Lost to Follow Up",
+              "N" ~ "Not Seen"),
          rec_cur_px_stat = case_match(
            rec_cur_px_stat,
             "A" ~ "Alive",
@@ -160,8 +167,8 @@ graft_failures|>
 pt_status_df|>
   group_by(don_ty, multi_organ)|>
   summarize(frequency = n())|>
-  ggplot()+
-  geom_col(aes(multi_organ, frequency, fill = don_ty, position = "dodge"))+
+  ggplot(aes(multi_organ, frequency, fill = don_ty))+
+  geom_col(position = "dodge")+
   labs(
     title = "Frequency of Living vs Deceased Liver Donors",
     x = "Multiple Organ Tranplant",
@@ -182,5 +189,24 @@ tableby(failed_graft ~ don_ty + multi_organ, data = pt_status_df)
 summary(table1, labelTranslations = mylabels1, pfootnote = TRUE)
 ```
 
+# Status at Last Follow Up
 
+```{r}
+pt_status_df|>
+  filter(don_ty == "Deceased Donor")|>
+  group_by(tfl_lastatus)|>
+  summarize(frequency = n())|>
+  drop_na()|>
+  ggplot(aes(x = tfl_lastatus, y = frequency, fill = tfl_lastatus))+
+  geom_col(position = "dodge")
+```
+
+```{r}
+pt_status_df|>
+  filter(don_ty == "Living Donor")|>
+  group_by(tfl_lastatus)|>
+  summarize(frequency = n())|>
+  ggplot(aes(x = tfl_lastatus, y = frequency,  fill = tfl_lastatus))+
+  geom_col(position = "dodge")
+```
 
