@@ -24,11 +24,14 @@ We began by exploring the dataset and available variables to investigate changes
 
 3. What are some of the characteristics of the organ donors?
 
+
 ## Evolution of Questions
 As our project evolved, we delved into more in-depth questions:
 
 1. Does sex impact waitlist mortality?
 2. ***
+3. Does the donor type impact patient recipient outcomes?
+4. For recipients who experienced graft failure, is there a difference in the time to graft failure based on donor type?
 
 ## Data
 We used two of the large datafiles available:
@@ -64,3 +67,5 @@ Kaplan–Meier curves were generated to compare waitlist survival between men an
 What were your findings? Are they what you expect? What insights into the data can you make?
 
 The ALD cohort shows demographic and clinical differences by sex, with women listed at younger ages and with slightly higher MELD scores, particularly in alcohol-related cirrhosis. Despite these baseline differences, waitlist mortality did not differ between men and women in either cirrhosis or acute alcohol-related hepatitis. This suggests that sex-based disparities in disease severity at listing do not translate into short-term differences in mortality risk after listing.
+
+
