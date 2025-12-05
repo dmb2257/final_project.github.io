@@ -11,7 +11,7 @@
 
 
 
-<title>Liver Transplants from Living vs Deceased Donors</title>
+<title>Living vs Deceased Donors</title>
 
 <script src="site_libs/header-attrs-2.29/header-attrs.js"></script>
 <script src="site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
@@ -36,6 +36,8 @@
 <script src="site_libs/navigation-1.1/codefolding.js"></script>
 <link href="site_libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
 <script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+<script src="site_libs/kePrint-0.0.1/kePrint.js"></script>
+<link href="site_libs/lightable-0.0.1/lightable.css" rel="stylesheet" />
 <link href="site_libs/font-awesome-6.5.2/css/all.min.css" rel="stylesheet" />
 <link href="site_libs/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet" />
 
@@ -337,7 +339,7 @@ div.tocify {
   <a href="page2.html">Waitlist Characteristics &amp; Mortality</a>
 </li>
 <li>
-  <a href="page3.html">Page 3</a>
+  <a href="page3.html">Donor Demographics</a>
 </li>
 <li>
   <a href="page4.html">Page 4</a>
@@ -371,15 +373,20 @@ div.tocify {
 
 
 
-<h1 class="title toc-ignore">Liver Transplants from Living vs Deceased
-Donors</h1>
+<h1 class="title toc-ignore">Living vs Deceased Donors</h1>
 
 </div>
 
 
-<div id="comparing-liver-transplants-from-living-and-deceased-donors"
+<div id="comparing-liver-transplants-by-donor-type"
 class="section level1">
-<h1>Comparing Liver Transplants from Living and Deceased Donors</h1>
+<h1>Comparing Liver Transplants by Donor Type</h1>
+<p>This page explores the relationship between the type of donor and the
+recipient patient outcomes. The donor type was defined by the variable
+<code>DON_TY</code> and identifies whether the patient received a
+transplant from a deceased donor or from a living donor. The recipient
+patient outcomes observed were the incidence of graft failures and
+recipient patient status at the last follow up.</p>
 <pre class="r"><code># Load Packages
 
 library(tidyverse)
@@ -390,9 +397,13 @@ library(kableExtra)
 #Loads the Liver file
 liver_data &lt;- 
   read_sas(&quot;../../github/tx_li.sas7bdat&quot;)</code></pre>
-<pre class="r"><code># This code chunk cleans the original liver dataset to create a consistent and tidy dataframe. This dataframe formats the date variables, identifies alcohol subtypes.  It also filters the data for years from 2020, for recipients 18 years and older, and omits the alcohol subtype &quot;Other&quot;. 
-
-# This cleans the data and identifies alcohol subtypes
+<p>The dataset was cleaned to create a sample of the ALD cohort,
+including only recipients with an alcohol subtype and were 21 years or
+older. The dataset was also filtered to only include data starting from
+2020. Additional variables were also created to assess the patient
+outcomes, such as <code>failed_graft</code> and
+<code>date_to_fail</code>.</p>
+<pre class="r"><code># This cleans the data and identifies alcohol subtypes
 
 tidy_liver_df=
   liver_data|&gt;
@@ -455,35 +466,11 @@ pt_status_df =
     days_to_follow = as.numeric(difftime(rec_px_stat_dt, tx_date, units = &quot;days&quot;)),
     days_to_fail = as.numeric(difftime(tfl_graft_dt, tx_date, unit = &quot;days&quot;)),
     failed_graft = !is.na(tfl_graft_dt))</code></pre>
-<div id="frequency-of-living-and-deceased-donors"
-class="section level2">
-<h2>Frequency of Living and Deceased Donors</h2>
+<div id="living-deceased-donor-frequencies" class="section level2">
+<h2>Living &amp; Deceased Donor Frequencies</h2>
 <pre class="r"><code># This code chunk creates a frequency table and column chart for the living vs deceased donor types. 
 
-
 pt_status_df|&gt;
-  group_by(don_ty)|&gt;
-  summarize(Frequency = n_distinct(pers_id))|&gt;
-  knitr::kable()</code></pre>
-<table>
-<thead>
-<tr class="header">
-<th align="left">don_ty</th>
-<th align="right">Frequency</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td align="left">Deceased Donor</td>
-<td align="right">9613</td>
-</tr>
-<tr class="even">
-<td align="left">Living Donor</td>
-<td align="right">333</td>
-</tr>
-</tbody>
-</table>
-<pre class="r"><code>pt_status_df|&gt;
   group_by(don_ty)|&gt;
   summarize(frequency = n_distinct(pers_id))|&gt;
   ggplot()+
@@ -492,233 +479,305 @@ pt_status_df|&gt;
     title = &quot;Frequency of Living vs Diseased Liver Donors&quot;,
     x = &quot;Donor Type&quot;,
     y = &quot;Frequency&quot;
-  )+
-  theme(axis.text.x = element_text(angle = 65, hjust = 1))</code></pre>
+  )</code></pre>
 <p><img src="page1_files/figure-html/unnamed-chunk-3-1.png" width="672" /></p>
 <pre class="r"><code>pt_status_df|&gt;
-  group_by(don_ty, rec_age_at_tx)|&gt;
-  summarize(frequency = n())|&gt;
-  ggplot()+
-    geom_col(aes(x= rec_age_at_tx, y = frequency, fill = don_ty), position = &quot;dodge&quot;)+
-    labs(
-    title = &quot;Frequency of Donor Types by Age of Recipient&quot;,
-    x = &quot;Age of Recipient&quot;,
-    y = &quot;Frequency of Donor Type&quot;,
-    fill = &quot;Donor Type&quot;
-  )</code></pre>
-<p><img src="page1_files/figure-html/unnamed-chunk-3-2.png" width="672" />
-There is a significantly greater frequency of liver donations received
-from deceased organ donors, compared to living organ donors. The
-following analyses will contain a much greater sample of patients who
-received a transplant from a deceased donor than those who received a
-transplant froma living donor.</p>
-</div>
-<div id="graft-failures" class="section level2">
-<h2>Graft Failures</h2>
-<pre class="r"><code># Subsample of Graft Failures: This code chunk creates a dataframe that includes information only for patients who experienced a graft failure.
-
-graft_failures =
-pt_status_df|&gt;
-  filter(failed_graft == &quot;TRUE&quot;)</code></pre>
-<pre class="r"><code># Frequency Table of Graft Failure by Donor Type and Histogram of Time to Failure
-
-graft_failures|&gt;
   group_by(don_ty)|&gt;
-  summarize(failure_freq = n())|&gt;
-  knitr::kable(
-    caption = &quot;Graft Failure by Donor Type&quot;
-  )</code></pre>
-<table>
-<caption>Graft Failure by Donor Type</caption>
+  summarize(Frequency = n_distinct(pers_id))|&gt;
+  rename(&quot;Donor Type&quot; =don_ty)|&gt;
+  kable(
+    format = &quot;html&quot;,
+    caption = &quot;Frequency of Donor Types&quot;,
+    align = c(&quot;l&quot;, &quot;r&quot;, &quot;r&quot;)
+  ) |&gt;
+  kable_styling(
+    bootstrap_options = c(&quot;striped&quot;, &quot;hover&quot;),
+    full_width = FALSE)</code></pre>
+<table class="table table-striped table-hover" style="width: auto !important; margin-left: auto; margin-right: auto;">
+<caption>
+Frequency of Donor Types
+</caption>
 <thead>
-<tr class="header">
-<th align="left">don_ty</th>
-<th align="right">failure_freq</th>
+<tr>
+<th style="text-align:left;">
+Donor Type
+</th>
+<th style="text-align:right;">
+Frequency
+</th>
 </tr>
 </thead>
 <tbody>
-<tr class="odd">
-<td align="left">Deceased Donor</td>
-<td align="right">380</td>
+<tr>
+<td style="text-align:left;">
+Deceased Donor
+</td>
+<td style="text-align:right;">
+9613
+</td>
 </tr>
-<tr class="even">
-<td align="left">Living Donor</td>
-<td align="right">9</td>
-</tr>
-</tbody>
-</table>
-<pre class="r"><code>graft_failures|&gt;
-  group_by(pers_id)|&gt;
-  ggplot()+
-  geom_boxplot(aes(don_ty, days_to_fail, fill = don_ty))+
-  labs(
-    title = &quot;Time Between Transplant to Graft Failure by Donor Type&quot;,
-    x = &quot;Donor Type&quot;,
-    y = &quot;Time Between Transplant to Graft Failure (days)&quot;,
-    fill = &quot;Donor Type&quot;
-  )+
-  theme(axis.text.x = element_text(angle = 65, hjust = 1))</code></pre>
-<p><img src="page1_files/figure-html/unnamed-chunk-5-1.png" width="672" /></p>
-</div>
-<div id="multi-organ-liver-transplants" class="section level2">
-<h2>Multi-Organ Liver Transplants</h2>
-<pre class="r"><code># Frequency Table of Multi-Organ Transplants by Donor Type and Column Chart of Frequencies
-graft_failures|&gt;
-  group_by(multi_organ, don_ty)|&gt;
-  summarize(frequency = n())|&gt;
-  knitr::kable()</code></pre>
-<table>
-<thead>
-<tr class="header">
-<th align="left">multi_organ</th>
-<th align="left">don_ty</th>
-<th align="right">frequency</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td align="left">FALSE</td>
-<td align="left">Deceased Donor</td>
-<td align="right">349</td>
-</tr>
-<tr class="even">
-<td align="left">FALSE</td>
-<td align="left">Living Donor</td>
-<td align="right">9</td>
-</tr>
-<tr class="odd">
-<td align="left">TRUE</td>
-<td align="left">Deceased Donor</td>
-<td align="right">31</td>
+<tr>
+<td style="text-align:left;">
+Living Donor
+</td>
+<td style="text-align:right;">
+333
+</td>
 </tr>
 </tbody>
 </table>
+<p>There is a significantly greater frequency of liver donations
+received from deceased organ donors, compared to living organ donors.
+The following analyses will contain a much greater sample of patients
+who received a transplant from a deceased donor than those who received
+a transplant from a living donor.</p>
 <pre class="r"><code>pt_status_df|&gt;
-  group_by(don_ty, multi_organ)|&gt;
-  summarize(frequency = n())|&gt;
-  ggplot(aes(multi_organ, frequency, fill = don_ty))+
-  geom_col(position = &quot;dodge&quot;)+
-  labs(
-    title = &quot;Frequency of Living vs Deceased Liver Donors&quot;,
-    x = &quot;Multiple Organ Tranplant&quot;,
-    y = &quot;Frequency&quot;,
+  group_by(don_ty, rec_age_at_tx)|&gt;
+  ggplot(aes(x= rec_age_at_tx, fill = don_ty))+
+    geom_density(alpha = 0.6)+
+    labs(
+    title = &quot;Recipient Age Distribution by Donor Type&quot;,
+    x = &quot;Age of Recipient (years)&quot;,
+    y = &quot;Density&quot;,
     fill = &quot;Donor Type&quot;
-  )+
-  theme(axis.text.x = element_text(angle = 65, hjust = 1))</code></pre>
-<p><img src="page1_files/figure-html/unnamed-chunk-6-1.png" width="672" /></p>
-<pre class="r"><code># Summary Table: This code chunk produces a summary table of the incidence of graft failure by donor type and whether or not the patient recieved a multi-organ transplant. We are interested in observing the relationship between donor type and graft failures,  adjusting for multi organ transplants.
-
-mylabels1&lt;-
-  list(failed_graft = &quot;Graft Failure&quot;, don_ty = &quot;Donor Type&quot;, multi_organ = &quot;Multi Organ Transplant&quot;)
-
-table1&lt;- 
-tableby(failed_graft ~ don_ty + multi_organ, data = pt_status_df)
-
-summary(table1, labelTranslations = mylabels1, pfootnote = TRUE)</code></pre>
-<table>
-<colgroup>
-<col width="37%" />
-<col width="17%" />
-<col width="15%" />
-<col width="19%" />
-<col width="10%" />
-</colgroup>
-<thead>
-<tr class="header">
-<th align="left"></th>
-<th align="center">FALSE (N=9643)</th>
-<th align="center">TRUE (N=389)</th>
-<th align="center">Total (N=10032)</th>
-<th align="right">p value</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td align="left"><strong>Donor Type</strong></td>
-<td align="center"></td>
-<td align="center"></td>
-<td align="center"></td>
-<td align="right">0.259<sup>1</sup></td>
-</tr>
-<tr class="even">
-<td align="left">   Deceased Donor</td>
-<td align="center">9319 (96.6%)</td>
-<td align="center">380 (97.7%)</td>
-<td align="center">9699 (96.7%)</td>
-<td align="right"></td>
-</tr>
-<tr class="odd">
-<td align="left">   Living Donor</td>
-<td align="center">324 (3.4%)</td>
-<td align="center">9 (2.3%)</td>
-<td align="center">333 (3.3%)</td>
-<td align="right"></td>
-</tr>
-<tr class="even">
-<td align="left"><strong>Multi Organ Transplant</strong></td>
-<td align="center"></td>
-<td align="center"></td>
-<td align="center"></td>
-<td align="right">0.711<sup>1</sup></td>
-</tr>
-<tr class="odd">
-<td align="left">   FALSE</td>
-<td align="center">8823 (91.5%)</td>
-<td align="center">358 (92.0%)</td>
-<td align="center">9181 (91.5%)</td>
-<td align="right"></td>
-</tr>
-<tr class="even">
-<td align="left">   TRUE</td>
-<td align="center">820 (8.5%)</td>
-<td align="center">31 (8.0%)</td>
-<td align="center">851 (8.5%)</td>
-<td align="right"></td>
-</tr>
-</tbody>
-</table>
-<ol style="list-style-type: decimal">
-<li>Pearson’s Chi-squared test</li>
-</ol>
+  )</code></pre>
+<p><img src="page1_files/figure-html/unnamed-chunk-4-1.png" width="672" />
+This figure demonstrates the age distribution of recipients based on
+their donor type. There is a similar trend in the densities of recipient
+age. However, there is a slightly greater density of older ages among
+those with living donors than those with deceased donors. Among both
+donor types, the greatest density of transplants occur for recipients
+between approximately 50-65 years old.</p>
 </div>
-<div id="recipient-patient-status-at-last-follow-up"
-class="section level2">
-<h2>Recipient Patient Status at Last Follow Up</h2>
-<div id="liver-received-from-deceased-donors" class="section level3">
-<h3>Liver Received from Deceased Donors</h3>
+<div id="patient-status-at-last-follow-up" class="section level2">
+<h2>Patient Status at Last Follow Up</h2>
+<p>The patient status (<code>tfl_lastatus</code>) was also included to
+identify if the patient was living, dead, retransplanted, lost to follow
+up, or not seen, at the last follow up.</p>
+<div id="transplants-from-deceased-donors" class="section level3">
+<h3>Transplants from Deceased Donors</h3>
 <pre class="r"><code># Column chart of last patient status for those who recieved organ transplant from deceased donor
 pt_status_df|&gt;
   filter(don_ty == &quot;Deceased Donor&quot;)|&gt;
   group_by(tfl_lastatus)|&gt;
   summarize(frequency = n())|&gt;
   drop_na()|&gt;
-  ggplot(aes(x = tfl_lastatus, y = frequency, fill = tfl_lastatus))+
+  ggplot(aes(fct_reorder(tfl_lastatus, frequency), y = frequency,  fill = tfl_lastatus))+
   geom_col(position = &quot;dodge&quot;)+
     labs(
-    title = &quot;Frequency of of Last Patient Status with Deceased Donors&quot;,
+    title = &quot;Frequency of of Last Patient Status (Deceased Donors)&quot;,
     x = &quot;Last Patient Status&quot;,
     y = &quot;Frequency&quot;,
     fill = &quot;Last Patient Status&quot;
   )+
-  theme(axis.text.x = element_text(angle = 65, hjust = 1))</code></pre>
-<p><img src="page1_files/figure-html/unnamed-chunk-8-1.png" width="672" /></p>
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))</code></pre>
+<p><img src="page1_files/figure-html/unnamed-chunk-5-1.png" width="672" /></p>
 </div>
-<div id="liver-received-from-living-donors" class="section level3">
-<h3>Liver Received from Living Donors</h3>
+<div id="transplants-from-living-donors" class="section level3">
+<h3>Transplants from Living Donors</h3>
 <pre class="r"><code>pt_status_df|&gt;
   filter(don_ty == &quot;Living Donor&quot;)|&gt;
   group_by(tfl_lastatus)|&gt;
   summarize(frequency = n())|&gt;
-  ggplot(aes(x = tfl_lastatus, y = frequency,  fill = tfl_lastatus))+
+  ggplot(aes(fct_reorder(tfl_lastatus, frequency), y = frequency,  fill = tfl_lastatus))+
   geom_col(position = &quot;dodge&quot;)+
       labs(
-    title = &quot;Frequency of of Last Patient Status with Living Donors&quot;,
-    x = &quot;Last Patient Status&quot;,
+    title = &quot;Frequency of of Last Follow-Up Patient Status (Living Donors)&quot;,
+    x = &quot;Last Follow-Up Status&quot;,
     y = &quot;Frequency&quot;,
-    fill = &quot;Last Patient Status&quot;
+    fill = &quot;Last Follow-Up Status&quot;
+  )+
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))</code></pre>
+<p><img src="page1_files/figure-html/unnamed-chunk-6-1.png" width="672" /></p>
+<p>There is a similar trend in the frequencies of each category of last
+follow-up status. Across donor types, the most frequent follow-up status
+was “Living”, followed by “Dead”. The least frequent follow-up status
+was “Lost to Follow Up”, this suggests that there is a strong follow up
+retention across the ALD cohort.</p>
+</div>
+</div>
+<div id="graft-failures" class="section level2">
+<h2>Graft Failures</h2>
+<p>The first measure of patient outcomes observed were graft failures.
+The ALD cohort was filtered to create a subsample of patients who
+experienced graft failures. Graft failures were identified by the
+presence of a graft failure date (<code>tfl_graft_dt</code>). The time
+to graft failure (<code>time_to_fail</code>) was computed from the
+difference in days between the transplant date (<code>tx_date</code>)
+and graft failure date (<code>tfl_graft_dt</code>).</p>
+<div id="total-number-of-graft-failures" class="section level3">
+<h3>Total Number of Graft Failures</h3>
+<pre class="r"><code># Subsample of Graft Failures: This code chunk creates a dataframe that includes information only for patients who experienced a graft failure.
+
+graft_failures2 =
+ pt_status_df|&gt;
+   group_by(don_ty)
+
+graft_failures =
+pt_status_df|&gt;
+  filter(failed_graft == TRUE)
+
+graft_failures|&gt;
+  group_by(don_ty)|&gt;
+  summarize(&quot;Graft Failures&quot; = n())|&gt;
+  rename(&quot;Donor Type&quot; =don_ty)|&gt;
+  kable(
+    format = &quot;html&quot;,
+    caption = &quot;Graft Failures by Donor Type&quot;,
+    align = c(&quot;l&quot;, &quot;r&quot;, &quot;r&quot;)
+  ) |&gt;
+  kable_styling(
+    bootstrap_options = c(&quot;striped&quot;, &quot;hover&quot;),
+    full_width = FALSE)</code></pre>
+<table class="table table-striped table-hover" style="width: auto !important; margin-left: auto; margin-right: auto;">
+<caption>
+Graft Failures by Donor Type
+</caption>
+<thead>
+<tr>
+<th style="text-align:left;">
+Donor Type
+</th>
+<th style="text-align:right;">
+Graft Failures
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+Deceased Donor
+</td>
+<td style="text-align:right;">
+380
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Living Donor
+</td>
+<td style="text-align:right;">
+9
+</td>
+</tr>
+</tbody>
+</table>
+<p>From the entire ALD cohort, there were 389 recipients who ever
+experienced a graft failure. There were 380 graft failures among
+recipients who received a transplant from a deceased donor and 9 graft
+failures among recipients who received a transplant from a deceased
+donor.</p>
+</div>
+<div id="time-to-graft-failure" class="section level3">
+<h3>Time to Graft Failure</h3>
+<pre class="r"><code># Frequency Table of Graft Failure by Donor Type and Histogram of Time to Failure
+graft_failures|&gt;
+  group_by(pers_id)|&gt;
+  ggplot()+
+  geom_boxplot(aes(don_ty, days_to_fail, fill = don_ty))+
+  labs(
+    title = &quot;Time to Graft Failure by Donor Type&quot;,
+    x = &quot;Donor Type&quot;,
+    y = &quot;Time to Graft Failure (days)&quot;,
+    fill = &quot;Donor Type&quot;
   )+
   theme(axis.text.x = element_text(angle = 65, hjust = 1))</code></pre>
-<p><img src="page1_files/figure-html/unnamed-chunk-9-1.png" width="672" /></p>
+<p><img src="page1_files/figure-html/unnamed-chunk-8-1.png" width="672" />
+This figure illustrates the time to graft failure by donor type. The
+median time to graft failure for transplants with a deceased donor was
+greater than the median time to graft failure for transplants with a
+living donor. The upper quartile is much higher for transplants with a
+deceased donor than living donor, suggesting that there is a greater
+time of the graft duration before graft failure.</p>
+</div>
+<div id="multi-organ-liver-transplants" class="section level3">
+<h3>Multi-Organ Liver Transplants</h3>
+<pre class="r"><code># Frequency Table of Multi-Organ Transplants by Donor Type and Column Chart of Frequencies
+graft_failures|&gt;
+  group_by(don_ty, multi_organ)|&gt;
+  summarize(frequency = n())|&gt;
+  pivot_wider(
+    names_from = multi_organ,
+    values_from = frequency
+  )|&gt;
+  rename(&quot;Donor Type&quot; =don_ty)|&gt;
+  rename(&quot;Mutli-Organ&quot; = &quot;TRUE&quot;)|&gt;
+  rename(&quot;Liver Only&quot; = &quot;FALSE&quot;)|&gt;
+  kable(
+    format = &quot;html&quot;,
+    caption = &quot;Transplant Type by Donor Type&quot;,
+    align = c(&quot;l&quot;, &quot;r&quot;, &quot;r&quot;)
+  ) |&gt;
+  kable_styling(
+    bootstrap_options = c(&quot;striped&quot;, &quot;hover&quot;),
+    full_width = FALSE)</code></pre>
+<table class="table table-striped table-hover" style="width: auto !important; margin-left: auto; margin-right: auto;">
+<caption>
+Transplant Type by Donor Type
+</caption>
+<thead>
+<tr>
+<th style="text-align:left;">
+Donor Type
+</th>
+<th style="text-align:right;">
+Liver Only
+</th>
+<th style="text-align:right;">
+Mutli-Organ
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+Deceased Donor
+</td>
+<td style="text-align:right;">
+349
+</td>
+<td style="text-align:right;">
+31
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Living Donor
+</td>
+<td style="text-align:right;">
+9
+</td>
+<td style="text-align:right;">
+NA
+</td>
+</tr>
+</tbody>
+</table>
+<pre class="r"><code>pt_status_df|&gt;
+  mutate(multi_organ = case_match(
+           multi_organ, 
+              &quot;TRUE&quot; ~ &quot;Multi-Organ&quot;,
+              &quot;FALSE&quot; ~ &quot;Liver Only&quot;))|&gt;
+  group_by(don_ty, multi_organ)|&gt;
+  summarize(frequency = n())|&gt;
+  ggplot(aes(multi_organ, frequency, fill = don_ty))+
+  geom_col(position = &quot;dodge&quot;)+
+  labs(
+    title = &quot;Frequency of Living vs Deceased Liver Donors&quot;,
+    x = &quot;Tranplant Type&quot;,
+    y = &quot;Frequency&quot;,
+    fill = &quot;Donor Type&quot;
+  )</code></pre>
+<p><img src="page1_files/figure-html/unnamed-chunk-9-1.png" width="672" />
+The subsample of recipients with graft failures was further stratified
+by the type of transplant they recieved. Transplant Type was identified
+by the organ transplanted under the variable
+(<code>rec_tx_org_ty</code>). If the only organ listed was liver, then
+the transplant type was categorized as “Liver Only”, if an organ was
+listed in addition to liver, then the transplant type was categorized as
+“Multi-Organ”. There were no multi-organ transplants from living donors
+that experienced graft failure. However, there were 9 Liver-Only
+transplants from living donors that experienced graft failures.</p>
 </div>
 </div>
 </div>
