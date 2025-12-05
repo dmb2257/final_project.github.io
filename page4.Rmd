@@ -1,22 +1,13 @@
 ---
-title: "Page 4"
+title: "Alcohol-Related Liver Transplants: Donor Characteristics and Prevalence"
 output: 
   html_document:
     toc: true
     toc_float: true
+    code_folding: hide
 ---
 
-Olivia's Workspace
-
-# Header
-text here 
-
-## Subsection 1
-text/code here
-
-## Subsection 2
-text/code here
----
+# Alcohol-Related Liver Transplants: Donor Characteristics and Prevalence
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(
@@ -25,321 +16,238 @@ knitr::opts_chunk$set(
   warning = FALSE
 )
 
-library(haven)
+library(haven) 
 library(dplyr)
-library(tidyr)
+library(tidyr) 
 library(ggplot2)
 library(janitor)
-library(knitr)
-library(forcats)
-library(lubridate)
+library(knitr)   
+library(forcats)  
+library(lubridate) 
+library(scales)
 
-# Read in the full transplant dataset from SAS file
-tx_li <- read_sas(file.choose())
+# Read in the full transplant dataset from the SAS file.
+tx_li <- read_sas("data/tx_li.sas7bdat")
 
-# Create donor-focused dataset
-donor_tx <- tx_li %>%
-  select(
-    DONOR_ID,
-    REC_TX_DT,
-    REC_AGE_AT_TX,
-    DON_CAD_DON_COD,
-    DON_DEATH_MECH,
-    DON_DEATH_CIRCUM,
-    DON_AGE,
-    DON_AGE_IN_MONTHS,
-    DON_HIST_CANCER,
-    DON_HIST_DIAB,
-    DON_HIST_HYPERTEN,
-    DON_HIST_COCAINE,
-    DON_HIST_IV_DRUG,
-    DON_HIST_OTHER_DRUG,
-    DON_CONT_CIGARETTE,
-    DON_CONT_COCAINE,
-    DON_CONT_IV_DRUG,
-    DON_CONT_OTHER_DRUG,
-    DON_MEET_CDC_HIGH_RISK
-  )
+# Create a cleaned liver transplant dataset for adults (≥18 years) from 2020 onward.
+liver_data <- tx_li %>%
+  mutate(
+    # Create transplant and listing dates.
+    tx_date      = as_date(REC_TX_DT),
+    listing_date = as_date(CAN_LISTING_DT),
 
-glimpse(donor_tx)
+    # Extract transplant year.
+    tx_year = year(tx_date),
+
+    # Calculate days listed on the waitlist.
+    days_listed = as.numeric(difftime(tx_date, listing_date, units = "days")),
+
+    # Define alcohol-related liver disease subtypes.
+    alcohol_subtype = case_when(
+      CAN_DGN  %in% c(4215, 4216) | CAN_DGN2 %in% c(4215, 4216) ~ "Alcohol-related Cirrhosis",
+      CAN_DGN  == 4217            | CAN_DGN2 == 4217            ~ "Acute Alcohol-related Hepatitis",
+      TRUE ~ "Other"
+    ),
+
+    # Create an indicator for ALD vs non-ALD.
+    ald_indication = if_else(alcohol_subtype == "Other", 0L, 1L)
+  ) %>%
+
+  # Keep adult recipients with observed transplant date from 2020 onward.
+  filter(
+    !is.na(PERS_ID),
+    !is.na(tx_date),
+    tx_year >= 2020,
+    REC_AGE_AT_TX >= 18
+  ) %>%
+
+  # Clean column names to snake_case format for analysis.
+  clean_names()
+
+# View the cleaned data structure.
+glimpse(liver_data)
 ```
 
+# Proportion of Alcohol-Related Liver Disease
+
+Proportion of adult liver transplants attributed to alcohol-related versus non-alcohol-related diagnoses from 2020–2024, showing that alcohol-related disease constitutes a substantial but variable portion of transplant indications over time.
 ```{r}
-# Restrict to donors with observed donor age and cause of death, keeping only adult donors aged 18 years or older and limiting to transplant years 2020 and later.
-donor_tx_clean <- donor_tx %>%
-  filter(
-    !is.na(DON_CAD_DON_COD),
-    !is.na(DON_AGE),
-    DON_AGE >= 18,
-    lubridate::year(tx_date) >= 2020
+# Create a summary table showing the prevalence of alcohol-related liver disease.
+ald_prevalence_overall <- liver_data %>%
+  count(ald_indication) %>%
+  mutate(
+    ald_label = if_else(
+      ald_indication == 1L,
+      "Alcohol-related liver disease",
+      "Non–alcohol-related indications"
+    ),
+    pct = n / sum(n)
   )
 
-# Create categorical age groups for adult donors.
-donor_tx_clean <- donor_tx_clean %>%
+# Display the overall prevalence table.
+kable(
+  ald_prevalence_overall %>%
+    select(ald_label, n, pct) %>%
+    mutate(pct = percent(pct, accuracy = 0.1)),
+  col.names = c("Indication", "Number of Transplants", "Percent of Transplants"),
+  caption   = "Prevalence of Alcohol-Related Liver Disease Among Adult Liver Transplants (≥18, TX ≥2020)."
+)
+
+# Summarize the prevalence of alcohol-related liver disease by transplant year.
+ald_prevalence_year <- liver_data %>%
+  count(tx_year, ald_indication) %>%
+  group_by(tx_year) %>%
   mutate(
-    age_group = cut(
-      DON_AGE,
-      breaks = c(18, 34, 49, 64, Inf),
-      labels = c("18–34", "35–49", "50–64", "65+"),
-      right  = TRUE
+    pct = n / sum(n),
+    ald_label = if_else(
+      ald_indication == 1L,
+      "Alcohol-related liver disease",
+      "Non–alcohol-related indications"
+    )
+  ) %>%
+  ungroup()
+
+# Display the year-specific prevalence table.
+kable(
+  ald_prevalence_year %>%
+    select(tx_year, ald_label, n, pct) %>%
+    mutate(pct = percent(pct, accuracy = 0.1)),
+  col.names = c("Transplant Year", "Indication", "Number of Transplants", "Percent within Year"),
+  caption   = "Prevalence of Alcohol-Related Liver Disease by Transplant Year (Adults ≥18, TX ≥2020)."
+)
+
+# Create a stacked bar plot showing the proportion of ALD vs non-ALD each year.
+ggplot(ald_prevalence_year, aes(x = tx_year, y = pct, fill = ald_label)) +
+  geom_col(color = "white") +
+  scale_y_continuous(labels = percent_format(accuracy = 1)) +
+  scale_fill_brewer(palette = "Set2") +
+  labs(
+    title = "Proportion of Alcohol-Related Liver Disease",
+    x     = "Transplant Year",
+    y     = "Percent of Transplants",
+    fill  = "Indication"
+  ) +
+  theme_minimal(base_size = 13) +
+  theme(
+    panel.grid.minor = element_blank()
+  )
+```
+
+# Donar Age by Alcohol-Related Liver Disease Etiology
+
+Donor age distributions stratified by alcohol-related etiology, illustrating visibly older donors among recipients transplanted for alcohol-related cirrhosis compared with acute alcohol-related hepatitis.
+```{r}
+# Restrict to alcohol-related liver disease transplant recipients.
+liver_ald <- liver_data %>%
+  filter(alcohol_subtype != "Other")
+
+# Create a clean donor type factor for readability.
+liver_ald <- liver_ald %>%
+  mutate(
+    don_ty_factor = case_when(
+      don_ty == "C" ~ "Deceased Donor",
+      don_ty == "L" ~ "Living Donor",
+      TRUE          ~ "Other / Unknown"
+    ),
+    don_ty_factor = factor(
+      don_ty_factor,
+      levels = c("Deceased Donor", "Living Donor", "Other / Unknown")
     )
   )
 
-# Calculate the total number of eligible adult donors in the dataset.
-n_total <- nrow(donor_tx_clean)
+# Check the distribution of alcohol subtypes in this ALD cohort.
+liver_ald %>%
+  count(alcohol_subtype) %>%
+  kable(
+    col.names = c("Alcohol-related Diagnosis", "Number of Transplants"),
+    caption   = "Count of Alcohol-Related Liver Transplants by Etiology (Adults ≥18, TX ≥2020)."
+  )
 
-# Generate summary statistics for cause of death including counts, percentages, and age distribution metrics.
-death_lifespan_table <- donor_tx_clean %>%
-  group_by(DON_CAD_DON_COD) %>%
+# Summarize donor characteristics by alcohol-related etiology.
+donor_by_subtype <- liver_ald %>%
+  group_by(alcohol_subtype) %>%
   summarise(
-    n_donors      = n(),
-    pct_of_donors = round(100 * n_donors / n_total, 1),
-    median_age    = round(median(DON_AGE, na.rm = TRUE), 1),
-    iqr_age       = round(IQR(DON_AGE, na.rm = TRUE), 1),
-    mean_age      = round(mean(DON_AGE, na.rm = TRUE), 1),
-    sd_age        = round(sd(DON_AGE, na.rm = TRUE), 1),
-    .groups       = "drop"
-  ) %>%
-  arrange(desc(n_donors)) %>%
-  rename(cause_of_death_code = DON_CAD_DON_COD)
+    n_transplants     = n(),
+    median_donor_age  = median(don_age, na.rm = TRUE),
+    iqr_donor_age     = IQR(don_age, na.rm = TRUE),
+    mean_donor_age    = mean(don_age, na.rm = TRUE),
+    sd_donor_age      = sd(don_age, na.rm = TRUE),
+    n_deceased_donors = sum(don_ty_factor == "Deceased Donor", na.rm = TRUE),
+    n_living_donors   = sum(don_ty_factor == "Living Donor",  na.rm = TRUE),
+    pct_deceased      = 100 * n_deceased_donors / n_transplants,
+    pct_living        = 100 * n_living_donors   / n_transplants,
+    .groups           = "drop"
+  )
 
-# Display the summary statistics table in the console.
-print(death_lifespan_table)
-
-# Produce a formatted table summarizing adult donor cause of death and lifespan metrics.
+# Display the donor summary table.
 kable(
-  death_lifespan_table,
-  caption = "Table. Distribution of Donor Cause of Death and Lifespan (Adults ≥18, TX ≥2020)."
+  donor_by_subtype,
+  digits  = 1,
+  caption = "Donor Age and Donor Type by Alcohol-Related Liver Disease Etiology (Adults ≥18, TX ≥2020)."
 )
 
-# Create a cross-tabulation of cause of death by adult age group to examine proportional patterns.
-death_by_agegroup <- donor_tx_clean %>%
-  count(DON_CAD_DON_COD, age_group) %>%
-  group_by(age_group) %>%
-  mutate(
-    pct_within_age = round(100 * n / sum(n), 1)
-  ) %>%
-  ungroup() %>%
-  rename(cause_of_death_code = DON_CAD_DON_COD)
+# Create a boxplot showing the distribution of donor age by alcohol-related etiology.
+ggplot(
+  liver_ald,
+  aes(x = alcohol_subtype, y = don_age, fill = alcohol_subtype)
+) +
+  geom_boxplot(alpha = 0.8, outlier_alpha = 0.6) +
+  labs(
+    title = "Donor Age by Alcohol-Related Liver Disease Etiology",
+    x     = "Alcohol-Related Etiology",
+    y     = "Donor Age at Organ Recovery (years)",
+    fill  = "Etiology"
+  ) +
+  theme_minimal(base_size = 13) +
+  theme(
+    legend.position = "none",
+    axis.text.x = element_text(angle = 20, hjust = 1)
+  )
 
-# Display the cross-tabulated dataset in the console.
-print(death_by_agegroup)
+# Perform a Wilcoxon rank-sum test comparing donor age by alcohol-related etiology.
+age_test_data <- liver_ald %>%
+  filter(alcohol_subtype %in% c("Alcohol-related Cirrhosis",
+                                "Acute Alcohol-related Hepatitis")) %>%
+  filter(!is.na(don_age))
 
-# Produce a formatted table summarizing cause of death frequencies within each age group.
-kable(
-  death_by_agegroup,
-  caption = "Table. Donor Cause of Death by Age Group (Adults ≥18, TX ≥2020).",
-  align = "c"
+wilcox_test_result <- wilcox.test(
+  don_age ~ alcohol_subtype,
+  data = age_test_data
 )
 
-# Create a bar plot comparing median donor age across cause-of-death categories.
-p_median_age_cod <- death_lifespan_table %>%
-  ggplot(aes(
-    x = fct_reorder(as.factor(cause_of_death_code), median_age),
-    y = median_age
-  )) +
-  geom_col(alpha = 0.85) +
-  coord_flip() +
-  labs(
-    title = "Median Donor Age by Cause-of-Death Code (Adults ≥18, TX ≥2020).",
-    x     = "Cause of Death Code",
-    y     = "Median Age (years)"
-  ) +
-  theme_minimal(base_size = 13)
+# Print the Wilcoxon test result to the console.
+wilcox_test_result
 
-# Print the median age plot.
-print(p_median_age_cod)
-
-# Identify the six most common causes of death among adult donors.
-top_causes <- death_lifespan_table %>%
-  slice_max(n_donors, n = 6) %>%
-  pull(cause_of_death_code)
-
-# Create a boxplot visualizing age distributions for the most common causes of donor death.
-p_age_by_cod <- donor_tx_clean %>%
-  filter(DON_CAD_DON_COD %in% top_causes) %>%
-  mutate(cause_of_death_code = as.factor(DON_CAD_DON_COD)) %>%
-  ggplot(aes(
-    x = fct_reorder(cause_of_death_code, DON_AGE, .fun = median),
-    y = DON_AGE
-  )) +
-  geom_boxplot(alpha = 0.8) +
-  coord_flip() +
-  labs(
-    title = "Donor Age Distribution Across Common Causes of Death (Adults ≥18, TX ≥2020).",
-    x     = "Cause of Death Code",
-    y     = "Donor Age (years)"
-  ) +
-  theme_minimal(base_size = 13)
-
-# Print the donor age distribution plot.
-print(p_age_by_cod)
-
-# Create a stacked bar chart showing the age group composition within each top cause of death.
-p_agegroup_by_cod <- donor_tx_clean %>%
-  filter(DON_CAD_DON_COD %in% top_causes) %>%
-  mutate(cause_of_death_code = as.factor(DON_CAD_DON_COD)) %>%
-  count(cause_of_death_code, age_group) %>%
-  group_by(cause_of_death_code) %>%
-  mutate(pct_within_cause = n / sum(n)) %>%
-  ungroup() %>%
-  ggplot(aes(
-    x   = fct_reorder(cause_of_death_code, -pct_within_cause),
-    y   = pct_within_cause,
-    fill = age_group
-  )) +
-  geom_col() +
-  scale_y_continuous(labels = scales::percent_format(accuracy = 1)) +
-  labs(
-    title = "Age Group Distribution Within Common Causes of Death (Adults ≥18, TX ≥2020).",
-    x     = "Cause of Death Code",
-    y     = "Percent of Donors",
-    fill  = "Age Group"
-  ) +
-  theme_minimal(base_size = 13)
-
-# Print the stacked age-group composition plot.
-print(p_agegroup_by_cod)
-```
-
-```{r}
-# Restrict to donors with non-missing cause of death and age, keep only adult donors (18 years and older), and limit to transplants from 2020 onward.
-donor_tx_clean <- donor_tx %>%
+# Create a 2x2 table of alcohol-related etiology by donor type (living vs deceased).
+donor_type_tab <- liver_ald %>%
   filter(
-    !is.na(DON_CAD_DON_COD),
-    !is.na(DON_AGE),
-    DON_AGE >= 18,
-    tx_year >= 2020
+    alcohol_subtype %in% c("Alcohol-related Cirrhosis",
+                           "Acute Alcohol-related Hepatitis"),
+    don_ty_factor %in% c("Deceased Donor", "Living Donor")
+  ) %>%
+  count(alcohol_subtype, don_ty_factor) %>%
+  pivot_wider(
+    names_from  = don_ty_factor,
+    values_from = n,
+    values_fill = 0
   )
 
-# Create categorical age groups for adult donors.
-donor_tx_clean <- donor_tx_clean %>%
-  mutate(
-    age_group = cut(
-      DON_AGE,
-      breaks = c(18, 34, 49, 64, Inf),
-      labels = c("18–34", "35–49", "50–64", "65+"),
-      right  = TRUE
-    )
-  )
-
-# Calculate the total number of eligible adult donors in the dataset.
-n_total <- nrow(donor_tx_clean)
-
-# Summarize donors by cause of death to obtain counts, percentages, and lifespan metrics.
-death_lifespan_table <- donor_tx_clean %>%
-  group_by(DON_CAD_DON_COD) %>%
-  summarise(
-    n_donors      = n(),
-    pct_of_donors = round(100 * n_donors / n_total, 1),
-    median_age    = round(median(DON_AGE, na.rm = TRUE), 1),
-    iqr_age       = round(IQR(DON_AGE, na.rm = TRUE), 1),
-    mean_age      = round(mean(DON_AGE, na.rm = TRUE), 1),
-    sd_age        = round(sd(DON_AGE, na.rm = TRUE), 1),
-    .groups       = "drop"
-  ) %>%
-  arrange(desc(n_donors)) %>%
-  rename(cause_of_death_code = DON_CAD_DON_COD)
-
-# Print the donor cause-of-death summary table to the console.
-print(death_lifespan_table)
-
-# Produce a formatted table summarizing donor cause of death and lifespan metrics for adult donors.
+# Print the contingency table.
 kable(
-  death_lifespan_table,
-  caption = "Table. Distribution of Donor Cause of Death and Lifespan (Adults ≥18, TX ≥2020)."
+  donor_type_tab,
+  caption = "Cross-Tabulation of Alcohol-Related Etiology by Donor Type."
 )
 
-# Create a cross-tabulation of cause of death by adult age group to examine proportional patterns.
-death_by_agegroup <- donor_tx_clean %>%
-  count(DON_CAD_DON_COD, age_group) %>%
-  group_by(age_group) %>%
-  mutate(
-    pct_within_age = round(100 * n / sum(n), 1)
-  ) %>%
-  ungroup() %>%
-  rename(cause_of_death_code = DON_CAD_DON_COD)
+# Convert to a matrix for chi-squared or Fisher's exact test.
+donor_type_matrix <- donor_type_tab %>%
+  select(-alcohol_subtype) %>%
+  as.matrix()
 
-# Print the cross-tabulation of cause of death by age group to the console.
-print(death_by_agegroup)
+# Perform a chi-squared test; if counts are small, Fisher's exact test can be considered instead.
+chisq_test_result <- stats::chisq.test(donor_type_matrix)
 
-# Produce a formatted table summarizing donor cause of death by age group for adult donors.
-kable(
-  death_by_agegroup,
-  caption = "Table. Donor Cause of Death by Age Group (Adults ≥18, TX ≥2020).",
-  align = "c"
-)
-
-# Create a bar plot of median donor age for each cause-of-death code among adult donors.
-p_median_age_cod <- death_lifespan_table %>%
-  ggplot(aes(
-    x = fct_reorder(as.factor(cause_of_death_code), median_age),
-    y = median_age
-  )) +
-  geom_col(alpha = 0.85) +
-  coord_flip() +
-  labs(
-    title = "Median Donor Age by Cause-of-Death Code (Adults ≥18, TX ≥2020).",
-    x     = "Cause of Death Code",
-    y     = "Median Age (years)"
-  ) +
-  theme_minimal(base_size = 13)
-
-# Print the median donor age plot.
-print(p_median_age_cod)
-
-# Identify the most common causes of death among adult donors to focus age comparisons.
-top_causes <- death_lifespan_table %>%
-  slice_max(n_donors, n = 6) %>%
-  pull(cause_of_death_code)
-
-# Create a boxplot showing donor age distributions for the most common causes of death among adult donors.
-p_age_by_cod <- donor_tx_clean %>%
-  filter(DON_CAD_DON_COD %in% top_causes) %>%
-  mutate(cause_of_death_code = as.factor(DON_CAD_DON_COD)) %>%
-  ggplot(aes(
-    x = fct_reorder(cause_of_death_code, DON_AGE, .fun = median),
-    y = DON_AGE
-  )) +
-  geom_boxplot(alpha = 0.8) +
-  coord_flip() +
-  labs(
-    title = "Donor Age Distribution by Leading Causes of Death (Adults ≥18, TX ≥2020).",
-    x     = "Cause of Death Code",
-    y     = "Donor Age (years)"
-  ) +
-  theme_minimal(base_size = 13)
-
-# Print the donor age distribution plot.
-print(p_age_by_cod)
-
-# Create a stacked bar chart showing age group composition within the most common causes of death among adult donors.
-p_agegroup_by_cod <- donor_tx_clean %>%
-  filter(DON_CAD_DON_COD %in% top_causes) %>%
-  mutate(cause_of_death_code = as.factor(DON_CAD_DON_COD)) %>%
-  count(cause_of_death_code, age_group) %>%
-  group_by(cause_of_death_code) %>%
-  mutate(pct_within_cause = n / sum(n)) %>%
-  ungroup() %>%
-  ggplot(aes(
-    x   = fct_reorder(cause_of_death_code, -pct_within_cause),
-    y   = pct_within_cause,
-    fill = age_group
-  )) +
-  geom_col() +
-  scale_y_continuous(labels = scales::percent_format(accuracy = 1)) +
-  labs(
-    title = "Age Group Composition Within Leading Causes of Death (Adults ≥18, TX ≥2020).",
-    x     = "Cause of Death Code",
-    y     = "Percent of Donors",
-    fill  = "Age Group"
-  ) +
-  theme_minimal(base_size = 13)
-
-# Print the age group composition plot.
-print(p_agegroup_by_cod)
+# Print the chi-squared test result.
+chisq_test_result
 ```
 
-
-
-
+---
