@@ -9,15 +9,17 @@ output:
 ## Motivation
 Liver transplantation is a life-saving therapy for patients with end-stage liver disease, and Alcohol-Associated Liver Disease (ALD) has become one of its leading indications in the United States. As ALD-related morbidity and mortality continue to rise, understanding patterns in transplant access, candidate characteristics, and post-transplant outcomes has become increasingly important.
 
-Our project uses data from the SRTR database that collects data from transplant programs, including the United Network for Organ Sharing (UNOS). It includes a national registry that captures detailed information on all transplant candidates, recipients, and donors in the U.S. The dataset includes demographic variables, clinical severity measures, transplant events, and outcomes, allowing for comprehensive evaluation of the transplant landscape.
 
 ## Related Work
 We were inspired to perform this analysis after discovering data from the SRTR database. SRTR's primary source of data is the [Organ Procurement and Transplantation Network (OPTN)](https://optn.transplant.hrsa.gov/). The SRTR database consists of many data tables with many components, including data on the transplant waiting lists, the donor/recipient matching process, deceased donors, living donors, and transplant recipients.  The data dictionary with all available variables can be found [here](https://www.srtr.org/requesting-srtr-data/saf-data-dictionary/).
 
 ## Initial Questions
 We began by exploring the dataset and available variables to investigate changes in the transplant landscape over time. We focused on those listed with alcohol-related liver disease given the recent increases in alcohol use in the United States and given that it is now the leading indication for liver transplantation. We decided to break down the questions we asked into 3 key questions:
+
 1. What are some of the outcomes when placed on the waitlist for an organ?
+
 2. What are some of the characteristics of the organ recipients?
+
 3. What are some of the characteristics of the organ donors?
 
 ## Evolution of Questions
@@ -28,14 +30,21 @@ As our project evolved, we delved into more in-depth questions:
 
 ## Data
 We used two of the large datafiles available:
+
 - `CAND_LIIN` includes persons who are registered on the OPTN waiting list and presents information about candidates during the time they are waiting to receive an organ.
+
 - `TX_LI` includes characteristics of the patient at the time of transplant and the transplant operation itself. 
 
 The data was cleaned using RStudio/RMarkdown to meet the following criteria:
+
 - Every observation required a unique identifier (`PERS_ID`).
+
 - All patients had to be over the age of 18 age (`CAN_AGE_AT_LISTING` and `REC_AGE_AT_TX` >= 18)
+
 - Dates must be saved in correct date format (`REC_TX_DT`, `CAN_LISTING_DT`)
+
 - Only patients with an alcohol-related diagnosis code were included. Those with alcohol-related cirrhosis had `CAN_DGN` 4215, 4216 and those with acute-alcohol related hepatitis had `CAN_DGN` 4217.
+
 - Evaluation or transplant should have occurred after the year 2020. We chose this time cut off because this is when liver transplants for a severe form of alcohol-related liver disease termed alcohol-related hepatitis, were first introduced. (`REC_TX_DT`, `CAN_LISTING_DT` >= 2020).
 
 ## Exploratory Analysis
