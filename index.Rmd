@@ -6,7 +6,7 @@ output:
     toc_float: true
 ---
 
-![Livers](photos/liver.jpg)
+![Livers are cool!](photos/liver.jpg)
 
 # Introduction
 
