@@ -11,7 +11,7 @@
 
 
 
-<title>Page 1</title>
+<title>Recipient Outcomes by the Types of Donors</title>
 
 <script src="site_libs/header-attrs-2.29/header-attrs.js"></script>
 <script src="site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
@@ -359,22 +359,346 @@ div.tocify {
 
 
 
-<h1 class="title toc-ignore">Page 1</h1>
+<h1 class="title toc-ignore">Recipient Outcomes by the Types of
+Donors</h1>
 
 </div>
 
 
-<p>Diane’s Workspace</p>
-<div id="header" class="section level1">
-<h1>Header</h1>
-<p>text here</p>
-<div id="subsection-1" class="section level2">
-<h2>Subsection 1</h2>
-<p>text/code here</p>
+<div id="recipient-patient-outcomes-based-on-donor-type"
+class="section level1">
+<h1>Recipient Patient Outcomes Based on Donor Type</h1>
+<div id="load-packages-and-dataset" class="section level2">
+<h2>Load Packages and Dataset</h2>
+<pre class="r"><code>library(tidyverse)</code></pre>
+<pre><code>## ── Attaching core tidyverse packages ──────────────────────── tidyverse 2.0.0 ──
+## ✔ dplyr     1.1.4     ✔ readr     2.1.5
+## ✔ forcats   1.0.0     ✔ stringr   1.5.2
+## ✔ ggplot2   3.5.2     ✔ tibble    3.3.0
+## ✔ lubridate 1.9.4     ✔ tidyr     1.3.1
+## ✔ purrr     1.1.0     
+## ── Conflicts ────────────────────────────────────────── tidyverse_conflicts() ──
+## ✖ dplyr::filter() masks stats::filter()
+## ✖ dplyr::lag()    masks stats::lag()
+## ℹ Use the conflicted package (&lt;http://conflicted.r-lib.org/&gt;) to force all conflicts to become errors</code></pre>
+<pre class="r"><code>library(haven)
+library(arsenal)</code></pre>
+<pre><code>## 
+## Attaching package: &#39;arsenal&#39;
+## 
+## The following object is masked from &#39;package:lubridate&#39;:
+## 
+##     is.Date</code></pre>
+<pre class="r"><code>#Loads the Liver file
+liver_data &lt;- 
+  read_sas(&quot;../../github/tx_li.sas7bdat&quot;)</code></pre>
 </div>
-<div id="subsection-2" class="section level2">
-<h2>Subsection 2</h2>
-<p>text/code here</p>
+<div id="data-cleaning" class="section level2">
+<h2>Data Cleaning</h2>
+<p>This code chunk cleans the original liver dataset to create a
+consistent and tidy dataframe. This dataframe formats the date
+variables, identifies alcohol subtypes. It also filters the data for
+years from 2020, for recipients 18 years and older, and omits the
+alcohol subtype “Other”.</p>
+<pre class="r"><code># This cleans the data and identifies alcohol subtypes
+
+tidy_liver_df=
+  liver_data|&gt;
+  mutate(tx_date = as_date(REC_TX_DT),
+         listing_date = as_date(CAN_LISTING_DT),
+         tx_year = year(tx_date),
+         days_listed = as.numeric(difftime(tx_date, listing_date, units = &quot;days&quot;)),
+         alcohol_subtype = case_when(CAN_DGN%in% c(4215, 4216) | CAN_DGN2 %in% c(4215, 4216) ~ &quot;Alcohol-related Cirrhosis&quot;,
+                                     CAN_DGN == 4217 | CAN_DGN2 == 4217 ~&quot;Acute Alcohol-related Hepatitis&quot;,
+                                     TRUE ~ &quot;Other&quot;))%&gt;%
+  
+# This filters the data for years from 2020, for recipients 18 years and older, and omits the alcohol subtype &quot;Other&quot;
+  
+  filter(!is.na(PERS_ID) &amp; !is.na(tx_date) &amp; tx_year &gt;= 2020 &amp; REC_AGE_AT_TX&gt;= 18, alcohol_subtype !=&quot;Other&quot;)|&gt;
+  arrange(PERS_ID, tx_date)|&gt;
+  janitor::clean_names()</code></pre>
+</div>
+</div>
+<div id="patient-status" class="section level1">
+<h1>Patient Status</h1>
+<p>This code chunk creates the pt_status_df, which includes recipient
+patient follow up information, the type of donor, and whether or not
+liver transplant was a multi-organ transplant.</p>
+<pre class="r"><code># This creates a dataframe to observe patient status, donor types, and multi-organ transplants
+
+pt_status_df = 
+  tidy_liver_df |&gt;
+  select(pers_id, don_ty, tx_date, rec_age_at_tx, rec_px_stat, rec_px_stat_dt, rec_tx_org_ty, alcohol_subtype, rec_cur_px_stat, tfl_lastatus, tfl_lafudate, tfl_graft_dt)|&gt;
+  mutate(don_ty = case_match(
+           don_ty, 
+              &quot;C&quot; ~ &quot;Deceased Donor&quot;,
+              &quot;L&quot; ~ &quot;Living Donor&quot;),
+         tx_date = as.Date(tx_date),
+         rec_px_stat= case_match(
+            rec_px_stat,
+              &quot;A&quot; ~ &quot;Living&quot;,
+              &quot;R&quot; ~ &quot;Retransplanted&quot;,
+              &quot;D&quot; ~ &quot;Dead&quot;,
+              &quot;L&quot; ~ &quot;Lost&quot;,
+              &quot;U&quot; ~ &quot;Unknown&quot;,
+              &quot;X&quot; ~ &quot;Natural Disaster&quot;),
+         rec_cur_px_stat = case_match(
+           rec_cur_px_stat,
+            &quot;A&quot; ~ &quot;Alive&quot;,
+            &quot;D&quot; ~ &quot;Dead&quot;,
+            &quot;F&quot; ~ &quot;Graft Failure: 1YR after graft failure&quot;,
+            &quot;G&quot; ~ &quot;Graft Failure: graft failure&quot;,
+            &quot;L&quot; ~ &quot;Lost&quot;,
+            &quot;R&quot; ~ &quot;Retransplanted&quot;,
+            &quot;S&quot; ~ &quot;Graft Failure: 2YR after graft failure&quot;
+         ))|&gt;
+    filter(rec_tx_org_ty %in% c(&quot;LI&quot;, &quot;KI LI 2LD&quot;, &quot;KI LI&quot;, &quot;KI LI IN&quot;, &quot;KI LU&quot;, &quot;KP LI&quot;, &quot;KP LI IN&quot;, &quot;LI HL&quot;, &quot;LI HR&quot;, &quot;LI IN&quot;, &quot;LI LU&quot;, &quot;PA LI&quot;, &quot;PA LI IN&quot;, &quot;PA LI LU&quot;))|&gt;
+    mutate(
+      multi_organ =as.factor(rec_tx_org_ty != &quot;LI&quot;))|&gt;
+      mutate(
+    days_to_lafollow = as.numeric(difftime(tfl_lafudate, tx_date, units = &quot;days&quot;)),
+    days_to_follow = as.numeric(difftime(rec_px_stat_dt, tx_date, units = &quot;days&quot;)),
+    days_to_fail = as.numeric(difftime(tfl_graft_dt, tx_date, unit = &quot;days&quot;)),
+    failed_graft = !is.na(tfl_graft_dt))</code></pre>
+<div id="frequency-table-and-column-chart-of-donor-types"
+class="section level2">
+<h2>Frequency Table and Column Chart of Donor Types</h2>
+<p>This code chunk creates a frequency table and column chart for the
+living vs deceased donor types.</p>
+<pre class="r"><code>pt_status_df|&gt;
+  group_by(don_ty)|&gt;
+  summarize(frequency = n_distinct(pers_id))|&gt;
+  knitr::kable()</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th align="left">don_ty</th>
+<th align="right">frequency</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">Deceased Donor</td>
+<td align="right">9613</td>
+</tr>
+<tr class="even">
+<td align="left">Living Donor</td>
+<td align="right">333</td>
+</tr>
+</tbody>
+</table>
+<pre class="r"><code>pt_status_df|&gt;
+  group_by(don_ty)|&gt;
+  summarize(frequency = n_distinct(pers_id))|&gt;
+  ggplot()+
+  geom_col(aes(don_ty, frequency, fill = don_ty, position = &quot;dodge&quot;))+
+  labs(
+    title = &quot;Frequency of Living vs Diseased Liver Donors&quot;,
+    x = &quot;Donor Type&quot;,
+    y = &quot;Frequency&quot;
+  )+
+  theme(axis.text.x = element_text(angle = 65, hjust = 1))</code></pre>
+<pre><code>## Warning in geom_col(aes(don_ty, frequency, fill = don_ty, position = &quot;dodge&quot;)):
+## Ignoring unknown aesthetics: position</code></pre>
+<p><img src="page1_files/figure-html/unnamed-chunk-5-1.png" width="672" /></p>
+<pre class="r"><code>pt_status_df|&gt;
+  group_by(don_ty, rec_age_at_tx)|&gt;
+  summarize(frequency = n())|&gt;
+  ggplot()+
+    geom_col(aes(x= rec_age_at_tx, y = frequency, fill = don_ty), position = &quot;dodge&quot;)+
+    labs(
+    title = &quot;Frequency of Donor Types by Age of Recipient&quot;,
+    x = &quot;Age of Recipient&quot;,
+    y = &quot;Frequency of Donor Type&quot;
+  )</code></pre>
+<pre><code>## `summarise()` has grouped output by &#39;don_ty&#39;. You can override using the
+## `.groups` argument.</code></pre>
+<p><img src="page1_files/figure-html/unnamed-chunk-5-2.png" width="672" /></p>
+</div>
+</div>
+<div id="subsample-of-graft-failures" class="section level1">
+<h1>Subsample of Graft Failures</h1>
+<p>This code chunk creates a dataframe that includes information only
+for patients who experienced a graft failure.</p>
+<pre class="r"><code>graft_failures =
+pt_status_df|&gt;
+  filter(failed_graft == &quot;TRUE&quot;)</code></pre>
+<div
+id="frequency-table-of-graft-failure-by-donor-type-and-histogram-of-time-to-failure"
+class="section level2">
+<h2>Frequency Table of Graft Failure by Donor Type and Histogram of Time
+to Failure</h2>
+<pre class="r"><code>graft_failures|&gt;
+  group_by(don_ty)|&gt;
+  summarize(failure_freq = n())|&gt;
+  knitr::kable()</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th align="left">don_ty</th>
+<th align="right">failure_freq</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">Deceased Donor</td>
+<td align="right">380</td>
+</tr>
+<tr class="even">
+<td align="left">Living Donor</td>
+<td align="right">9</td>
+</tr>
+</tbody>
+</table>
+<pre class="r"><code>graft_failures|&gt;
+  group_by(pers_id)|&gt;
+  ggplot()+
+  geom_boxplot(aes(don_ty, days_to_fail, fill = don_ty))+
+  labs(
+    title = &quot;Time Between Transplant to Graft Failure by Donor Type&quot;,
+    x = &quot;Donor Type&quot;,
+    y = &quot;Time Between Transplant to Graft Failure (days)&quot;
+  )+
+  theme(axis.text.x = element_text(angle = 65, hjust = 1))</code></pre>
+<p><img src="page1_files/figure-html/unnamed-chunk-7-1.png" width="672" /></p>
+</div>
+</div>
+<div id="multi-organ-transplants-and-donor-types"
+class="section level1">
+<h1>Multi-Organ Transplants and Donor Types</h1>
+<div
+id="frequency-table-of-multi-organ-transplants-by-donor-type-and-column-chart-of-frequencies"
+class="section level2">
+<h2>Frequency Table of Multi-Organ Transplants by Donor Type and Column
+Chart of Frequencies</h2>
+<pre class="r"><code>graft_failures|&gt;
+  group_by(multi_organ, don_ty)|&gt;
+  summarize(frequency = n())|&gt;
+  knitr::kable()</code></pre>
+<pre><code>## `summarise()` has grouped output by &#39;multi_organ&#39;. You can override using the
+## `.groups` argument.</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th align="left">multi_organ</th>
+<th align="left">don_ty</th>
+<th align="right">frequency</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">FALSE</td>
+<td align="left">Deceased Donor</td>
+<td align="right">349</td>
+</tr>
+<tr class="even">
+<td align="left">FALSE</td>
+<td align="left">Living Donor</td>
+<td align="right">9</td>
+</tr>
+<tr class="odd">
+<td align="left">TRUE</td>
+<td align="left">Deceased Donor</td>
+<td align="right">31</td>
+</tr>
+</tbody>
+</table>
+<pre class="r"><code>pt_status_df|&gt;
+  group_by(don_ty, multi_organ)|&gt;
+  summarize(frequency = n())|&gt;
+  ggplot()+
+  geom_col(aes(multi_organ, frequency, fill = don_ty, position = &quot;dodge&quot;))+
+  labs(
+    title = &quot;Frequency of Living vs Deceased Liver Donors&quot;,
+    x = &quot;Multiple Organ Tranplant&quot;,
+    y = &quot;Frequency&quot;
+  )+
+  theme(axis.text.x = element_text(angle = 65, hjust = 1))</code></pre>
+<pre><code>## `summarise()` has grouped output by &#39;don_ty&#39;. You can override using the
+## `.groups` argument.</code></pre>
+<pre><code>## Warning in geom_col(aes(multi_organ, frequency, fill = don_ty, position =
+## &quot;dodge&quot;)): Ignoring unknown aesthetics: position</code></pre>
+<p><img src="page1_files/figure-html/unnamed-chunk-8-1.png" width="672" /></p>
+</div>
+<div id="summary-table" class="section level2">
+<h2>Summary Table</h2>
+<p>This code chunk produces a summary table of the incidence of graft
+failure by donor type and whether or not the patient recieved a
+multi-organ transplant. We are interested in observing the relationship
+between donor type and graft failures, adjusting for multi organ
+transplants.</p>
+<pre class="r"><code>mylabels1&lt;-
+  list(failed_graft = &quot;Graft Failure&quot;, don_ty = &quot;Donor Type&quot;, multi_organ = &quot;Multi Organ Transplant&quot;)
+
+table1&lt;- 
+tableby(failed_graft ~ don_ty + multi_organ, data = pt_status_df)
+
+summary(table1, labelTranslations = mylabels1, pfootnote = TRUE)</code></pre>
+<table>
+<colgroup>
+<col width="37%" />
+<col width="17%" />
+<col width="15%" />
+<col width="19%" />
+<col width="10%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="left"></th>
+<th align="center">FALSE (N=9643)</th>
+<th align="center">TRUE (N=389)</th>
+<th align="center">Total (N=10032)</th>
+<th align="right">p value</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left"><strong>Donor Type</strong></td>
+<td align="center"></td>
+<td align="center"></td>
+<td align="center"></td>
+<td align="right">0.259<sup>1</sup></td>
+</tr>
+<tr class="even">
+<td align="left">   Deceased Donor</td>
+<td align="center">9319 (96.6%)</td>
+<td align="center">380 (97.7%)</td>
+<td align="center">9699 (96.7%)</td>
+<td align="right"></td>
+</tr>
+<tr class="odd">
+<td align="left">   Living Donor</td>
+<td align="center">324 (3.4%)</td>
+<td align="center">9 (2.3%)</td>
+<td align="center">333 (3.3%)</td>
+<td align="right"></td>
+</tr>
+<tr class="even">
+<td align="left"><strong>Multi Organ Transplant</strong></td>
+<td align="center"></td>
+<td align="center"></td>
+<td align="center"></td>
+<td align="right">0.711<sup>1</sup></td>
+</tr>
+<tr class="odd">
+<td align="left">   FALSE</td>
+<td align="center">8823 (91.5%)</td>
+<td align="center">358 (92.0%)</td>
+<td align="center">9181 (91.5%)</td>
+<td align="right"></td>
+</tr>
+<tr class="even">
+<td align="left">   TRUE</td>
+<td align="center">820 (8.5%)</td>
+<td align="center">31 (8.0%)</td>
+<td align="center">851 (8.5%)</td>
+<td align="right"></td>
+</tr>
+</tbody>
+</table>
+<ol style="list-style-type: decimal">
+<li>Pearson’s Chi-squared test</li>
+</ol>
 </div>
 </div>
 
