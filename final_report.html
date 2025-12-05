@@ -366,28 +366,96 @@ div.tocify {
 
 <div id="motivation" class="section level2">
 <h2>Motivation</h2>
-<p>Provide an overview of the project goals and motivation.</p>
+<p>Liver transplantation is a life-saving therapy for patients with
+end-stage liver disease, and Alcohol-Associated Liver Disease (ALD) has
+become one of its leading indications in the United States. As
+ALD-related morbidity and mortality continue to rise, understanding
+patterns in transplant access, candidate characteristics, and
+post-transplant outcomes has become increasingly important.</p>
+<p>Our project uses data from the SRTR database that collects data from
+transplant programs, including the United Network for Organ Sharing
+(UNOS). It includes a national registry that captures detailed
+information on all transplant candidates, recipients, and donors in the
+U.S. The dataset includes demographic variables, clinical severity
+measures, transplant events, and outcomes, allowing for comprehensive
+evaluation of the transplant landscape.</p>
 </div>
 <div id="related-work" class="section level2">
 <h2>Related Work</h2>
-<p>Anything that inspired you, such as a paper, a web site, or something
-we discussed in class.</p>
+<p>We were inspired to perform this analysis after discovering data from
+the SRTR database. SRTR’s primary source of data is the <a
+href="https://optn.transplant.hrsa.gov/">Organ Procurement and
+Transplantation Network (OPTN)</a>. The SRTR database consists of many
+data tables with many components, including data on the transplant
+waiting lists, the donor/recipient matching process, deceased donors,
+living donors, and transplant recipients. The data dictionary with all
+available variables can be found <a
+href="https://www.srtr.org/requesting-srtr-data/saf-data-dictionary/">here</a>.</p>
 </div>
 <div id="initial-questions" class="section level2">
 <h2>Initial Questions</h2>
-<p>What questions are you trying to answer? How did these questions
-evolve over the course of the project? What new questions did you
-consider in the course of your analysis?</p>
+<p>We began by exploring the dataset and available variables to
+investigate changes in the transplant landscape over time. We focused on
+those listed with alcohol-related liver disease given the recent
+increases in alcohol use in the United States and given that it is now
+the leading indication for liver transplantation. We decided to break
+down the questions we asked into 3 key questions: 1. What are some of
+the outcomes when placed on the waitlist for an organ? 2. What are some
+of the characteristics of the organ recipients? 3. What are some of the
+characteristics of the organ donors?</p>
+</div>
+<div id="evolution-of-questions" class="section level2">
+<h2>Evolution of Questions</h2>
+<p>As our project evolved, we delved into more in-depth questions:</p>
+<ol style="list-style-type: decimal">
+<li>Does sex impact waitlist mortality?</li>
+<li><hr /></li>
+</ol>
 </div>
 <div id="data" class="section level2">
 <h2>Data</h2>
-<p>Source, scraping method, cleaning, etc.</p>
+<p>We used two of the large datafiles available: -
+<code>CAND_LIIN</code> includes persons who are registered on the OPTN
+waiting list and presents information about candidates during the time
+they are waiting to receive an organ. - <code>TX_LI</code> includes
+characteristics of the patient at the time of transplant and the
+transplant operation itself.</p>
+<p>The data was cleaned using RStudio/RMarkdown to meet the following
+criteria: - Every observation required a unique identifier
+(<code>PERS_ID</code>). - All patients had to be over the age of 18 age
+(<code>CAN_AGE_AT_LISTING</code> and <code>REC_AGE_AT_TX</code> &gt;=
+18) - Dates must be saved in correct date format
+(<code>REC_TX_DT</code>, <code>CAN_LISTING_DT</code>) - Only patients
+with an alcohol-related diagnosis code were included. Those with
+alcohol-related cirrhosis had <code>CAN_DGN</code> 4215, 4216 and those
+with acute-alcohol related hepatitis had <code>CAN_DGN</code> 4217. -
+Evaluation or transplant should have occurred after the year 2020. We
+chose this time cut off because this is when liver transplants for a
+severe form of alcohol-related liver disease termed alcohol-related
+hepatitis, were first introduced. (<code>REC_TX_DT</code>,
+<code>CAN_LISTING_DT</code> &gt;= 2020).</p>
 </div>
 <div id="exploratory-analysis" class="section level2">
 <h2>Exploratory Analysis</h2>
-<p>Visualizations, summaries, and exploratory statistical analyses.
-Justify the steps you took, and show any major changes to your
-ideas.text here</p>
+<p>Demographic and clinical characteristics at listing—including age,
+MELD score, race/ethnicity, and diagnostic subtype—were summarized
+overall and stratified by sex. Additional subgroup tables describe
+individuals separately with alcohol-related cirrhosis and acute
+alcohol-related hepatitis. Continuous variables are reported using
+medians and interquartile ranges, and categorical variables using
+frequencies and percentages. These tables illustrate differences in
+listing severity, demographic composition, and raw waitlist mortality
+across clinical subgroups. Group comparisons in descriptive tables were
+assessed using non-parametric tests for continuous variables and
+χ²-based methods for categorical variables, with p-values provided to
+summarize evidence of between-group differences. T</p>
+<p>Kaplan–Meier curves were generated to compare waitlist survival
+between men and women. Each curve reflects time from listing to waitlist
+death, with censoring at transplant, administrative removal, or end of
+follow-up. Confidence bands depict uncertainty in the estimated survival
+probabilities, and log-rank testing evaluates whether survival differs
+by sex. These plots summarize the cumulative risk of waitlist mortality
+over time and highlight potential sex-based disparities.</p>
 </div>
 <div id="additional-analysis" class="section level2">
 <h2>Additional Analysis</h2>

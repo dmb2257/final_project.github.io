@@ -27,14 +27,16 @@ As our project evolved, we delved into more in-depth questions:
 2. ***
 
 ## Data
-Source, scraping method, cleaning, etc. 
 We used two of the large datafiles available:
 - `CAND_LIIN` includes persons who are registered on the OPTN waiting list and presents information about candidates during the time they are waiting to receive an organ.
 - `TX_LI` includes characteristics of the patient at the time of transplant and the transplant operation itself. 
 
 The data was cleaned using RStudio/RMarkdown to meet the following criteria:
-
-First, we cleaned the dataset by filtering our dataset to patients over the age of 18. We restricted our analysis to those with an alcohol-related diagnosis and who were evaluated or transplanted after the year 2020. We chose this time cut off because this is when liver transplants for a severe form of alcohol-related liver disease termed alcohol-related hepatitis, were first introduced.
+- Every observation required a unique identifier (`PERS_ID`).
+- All patients had to be over the age of 18 age (`CAN_AGE_AT_LISTING` and `REC_AGE_AT_TX` >= 18)
+- Dates must be saved in correct date format (`REC_TX_DT`, `CAN_LISTING_DT`)
+- Only patients with an alcohol-related diagnosis code were included. Those with alcohol-related cirrhosis had `CAN_DGN` 4215, 4216 and those with acute-alcohol related hepatitis had `CAN_DGN` 4217.
+- Evaluation or transplant should have occurred after the year 2020. We chose this time cut off because this is when liver transplants for a severe form of alcohol-related liver disease termed alcohol-related hepatitis, were first introduced. (`REC_TX_DT`, `CAN_LISTING_DT` >= 2020).
 
 ## Exploratory Analysis
 Visualizations, summaries, and exploratory statistical analyses. Justify the steps you took, and show any major changes to your ideas.text here 
