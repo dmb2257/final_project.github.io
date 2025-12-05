@@ -7,22 +7,24 @@ output:
 ---
 
 ## Motivation
-Liver transplantation is a life-saving therapy for patients with end-stage liver disease, and Alcohol-Associated Liver Disease (ALD) has become one of its leading indications in the United States. As ALD-related morbidity and mortality continue to rise, understanding patterns in transplant access, candidate characteristics, and post-transplant outcomes has become increasingly important. 
+Liver transplantation is a life-saving therapy for patients with end-stage liver disease, and Alcohol-Associated Liver Disease (ALD) has become one of its leading indications in the United States. As ALD-related morbidity and mortality continue to rise, understanding how ALD shapes waitlist dynamics, transplant access, and post-transplant outcomes has become increasingly important.
 
 In this website, we provide an overview of key aspects of liver transplantation with a focus on ALD, highlighting trends in candidate demographics, transplant rates, and post-transplant outcomes. Our goal is to offer an accessible, data-driven perspective on the evolving role of ALD in liver transplantation.
 
 
 ## Related Work
-We were inspired to perform this analysis after discovering data from the SRTR database. SRTR's primary source of data is the [Organ Procurement and Transplantation Network (OPTN)](https://optn.transplant.hrsa.gov/). The SRTR database consists of many data tables with many components, including data on the transplant waiting lists, the donor/recipient matching process, deceased donors, living donors, and transplant recipients.  The data dictionary with all available variables can be found [here](https://www.srtr.org/requesting-srtr-data/saf-data-dictionary/).
+We were inspired to perform this analysis after discovering data from the SRTR database. SRTR's primary source of data is the [Organ Procurement and Transplantation Network (OPTN)](https://optn.transplant.hrsa.gov/). The SRTR database consists of many data tables with many components, including data on the transplant waiting lists, the donor/recipient matching process, deceased donors, living donors, and transplant recipients.  The data dictionary, which defines allavailable variables, can be found [here](https://www.srtr.org/requesting-srtr-data/saf-data-dictionary/).
 
 ## Initial Questions
-We began by exploring the dataset and available variables to investigate changes in the transplant landscape over time. We focused on those listed with alcohol-related liver disease given the recent increases in alcohol use in the United States and given that it is now the leading indication for liver transplantation. We decided to break down the questions we asked into 3 key questions:
+We began by exploring the dataset and available variables to investigate changes in the transplant landscape over time. We focused on those listed with alcohol-related liver disease given the recent increases in alcohol use in the United States and because it is now the leading indication for liver transplantation.
 
-1. What are some of the outcomes when placed on the waitlist for an organ?
+We decided to break down the questions we asked into 3 key areas:
 
-2. What are some of the characteristics of the organ recipients?
+1. What are the outcomes for patients placed on the organ waitlist?
 
-3. What are some of the characteristics of the organ donors?
+2. What are the characteristics of organ recipients?
+
+3. What are the characteristics of organ donors?
 
 
 ## Evolution of Questions
@@ -50,7 +52,7 @@ The data was cleaned using RStudio/RMarkdown to meet the following criteria:
 
 - Only patients with an alcohol-related diagnosis code were included. Those with alcohol-related cirrhosis had `CAN_DGN` 4215, 4216 and those with acute-alcohol related hepatitis had `CAN_DGN` 4217.
 
-- Evaluation or transplant should have occurred after the year 2020. We chose this time cut off because this is when liver transplants for a severe form of alcohol-related liver disease termed alcohol-related hepatitis, were first introduced. (`REC_TX_DT`, `CAN_LISTING_DT` >= 2020).
+- Evaluation or transplant should have occurred after the year 2020, the year when transplants for alcohol-related hepatitis became more widely adopted. (`REC_TX_DT`, `CAN_LISTING_DT` >= 2020).
 
 ## Exploratory Analysis
 
@@ -65,6 +67,7 @@ Racial distribution analyses revealed that both donor sources and transplant rec
 
 ## Limitations
 Below we have outlined a few limitations in our analysis:
+
 - *Limited capture of social determinants of health*: Key factors known to influence transplant access and outcomes—such as socioeconomic status, education, social support, and structural barriers to care—are not comprehensively represented in the dataset. As a result, we are unable to assess the role of social inequities in access to transplant and recovery.
 
 - *Incomplete and inconsistently reported data*: As we originally perused the data sets, we noted that several variables contained missing or the values were not recorded in the data dictionary, particularly in race, cause-of-death, and donor mechanism-of-death fields. This may introduce classification uncertainty and reduce statistical power in subgroup comparisons. 
@@ -73,8 +76,6 @@ Below we have outlined a few limitations in our analysis:
 
 
 ## Discussion
-What were your findings? Are they what you expect? What insights into the data can you make?
-
 Our exploratory analyses provides context regarding the demographic landscape of liver transplantation in the United States for patients suffering from Alcohol-related Cirrhosis or Acute Alcohol-related Hepatitis. Recipients tended to be older than donors, reflecting the progression of liver disease to the point of transplantation and the younger age at which donor death or living donor eligibility typically occurs. Racial distribution plots showed that White individuals comprise the majority of both the donor and recipient populations, while minority racial groups remain underrepresented. The donor–recipient race matching heatmap further illustrated that match likelihood is highest among White and Black/African American individuals but substantially lower for other racial groups. These findings suggest that disparities in donor availability may reinforce inequities in transplant access for historically marginalized populations.
 
 The ALD cohort shows demographic and clinical differences by sex, with women listed at younger ages and with slightly higher MELD scores, particularly in alcohol-related cirrhosis. Despite these baseline differences, waitlist mortality did not differ between men and women in either cirrhosis or acute alcohol-related hepatitis. This suggests that sex-based disparities in disease severity at listing do not translate into short-term differences in mortality risk after listing.
