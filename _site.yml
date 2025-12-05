@@ -9,7 +9,7 @@ navbar:
       href: page1.html
     - text: "Waitlist Characteristics & Mortality"
       href: page2.html
-    - text: "Donor Demographics"
+    - text: "Demographics"
       href: page3.html
     - text: "Page 4"
       href: page4.html

@@ -64,7 +64,7 @@ liver_data_clean_1 =
 ```
 
 
-```{r, echo=FALSE}
+```{r, echo=FALSE, eval=FALSE}
 race_allyears = liver_data_clean_1 |>
   count(tx_year, don_race_srtr_std) |>
   group_by(tx_year) |>
@@ -100,12 +100,6 @@ race_allyears
 
 ```
 
-The distribution of donor race among liver transplant donors in the United States has remained highly stable over time between 2002 and 2025. White donors consistently account for the vast majority of all donors each year, representing approximately 75–85% of the donor pool. Black or African American donors make up the second-largest group, generally ranging from 10–20% across the years. Asian, American Indian or Alaska Native, Native Hawaiian or Other Pacific Islander, and Multi-Racial donors each represent a very small proportion of donors annually — typically under 5% combined. (Note: As you can see by hovering on the plot, this data is not complete for 2025 yet, so there are several fewer donors than years past)
-
-Contextually, based on the 2020 US Census, approximately 57.7% of the US population is White, 14.4% identify as Black or African American, 7% is Asian, 0.5% Native Hawaiian or Other Pacific Islander and 10.2% identify as multiracial. 
-
-
--------------------------------------------------------------------
 
 ```{r, echo=FALSE}
 liver_data = liver_data_raw |> 
@@ -194,19 +188,29 @@ liver_data_clean =
 ## Donor Demographics: Alcohol Patients
 ```{r, echo=FALSE}
 #Race breakdown since 2020 annually for all donors 
-race_starting_2020 = liver_data_clean |>
+race_starting_2020 <- liver_data_clean |>
   count(tx_year, don_race_srtr_std) |>
   mutate(
-  don_race_srtr_std = case_when(
-    don_race_srtr_std == "Native Hawaiian or Other Pacific Islander" ~
-      "Native Hawaiian or Other\nPacific Islander",
-    TRUE ~ don_race_srtr_std
-  )
-) |> 
+    don_race_srtr_std = case_when(
+      don_race_srtr_std == "Native Hawaiian or Other Pacific Islander" ~
+        "Native Hawaiian or Other\nPacific Islander",
+      TRUE ~ don_race_srtr_std
+    )
+  ) |>
   group_by(tx_year) |>
   mutate(pct = n / sum(n)) |>
   ungroup() |>
-  ggplot(aes(x = tx_year, y = pct, fill = don_race_srtr_std)) +
+  ggplot(aes(
+    x = tx_year,
+    y = pct,
+    fill = don_race_srtr_std,
+    text = paste0(
+      "Year: ", tx_year, "<br>",
+      "Race: ", don_race_srtr_std, "<br>",
+      "Percent: ", scales::percent(pct, accuracy = 0.1), "<br>",
+      "Count: ", n
+    )
+  )) +
   geom_col(color = "white") +
   scale_y_continuous(labels = scales::percent_format()) +
   scale_fill_brewer(palette = "Set2") +
@@ -260,28 +264,50 @@ interactive_race <- liver_data_clean |>
     y = "Percent of Donors",
     fill = NULL
   ) +
-  theme_minimal()
+  theme_minimal()+
+theme(
+    axis.title.y = element_blank()
+  )
 ```
 
 
 ```{r, echo=FALSE}
 
+plot_year  = ggplotly(race_starting_2020, tooltip = "text")
+plot_type  = ggplotly(interactive_race,   tooltip = "text")
+plot_type = style(plot_type, showlegend = FALSE)
 
-(race_starting_2020 + interactive_race) +
-  plot_layout(ncol = 2, guides = "collect") &
-  theme(
-    legend.position = "bottom",
-    legend.title = element_text(size = 10),
-    legend.text  = element_text(size = 7)
-  ) &
-  guides(
-    fill = guide_legend(nrow = 2, byrow = TRUE)  # shared 2-row legend
+
+combined_race = subplot(
+  plot_year,
+  plot_type,
+  nrows = 1,
+  shareY = FALSE,   # or TRUE if you want same y-scale
+  titleX = TRUE,
+  titleY = TRUE
+) |>
+  layout(
+    title = list(text = "Donors: Distribution by Race and Type"),
+    legend = list(
+      orientation = "h",
+      x = 0.5,
+      xanchor = "center",
+      y = -0.15
+    )
   )
+
+combined_race
+
+
 
 ```
 
 
 In 2020, a new indication for liver transplants was created for people with severe liver disease from alcohol. For this reason, the following demographics look at donors of patients (recipients) who were suffering from Alcohol-related Cirrhosis or Acute Alcohol-related Hepatitis. On the right you see the breakdown annually and on the left we see the break down across all the years by living and deceased. 
+
+The distribution of donor race among liver transplant donors in the United States has remained highly stable over time. Specifically, since 2020, White donors consistently account for the vast majority of all donors each year, representing approximately 75–85% of the donor pool. Black or African American donors make up the second-largest group, generally ranging from 10–20% across the years. Asian, American Indian or Alaska Native, Native Hawaiian or Other Pacific Islander, and Multi-Racial donors each represent a very small proportion of donors annually — typically under 5% combined. (Note: As you can see by hovering on the plot, this data is not complete for 2025 yet, so there are several fewer donors than years past)
+
+Contextually, based on the 2020 US Census, approximately 57.7% of the US population is White, 14.4% identify as Black or African American, 7% is Asian, 0.5% Native Hawaiian or Other Pacific Islander and 10.2% identify as multiracial. 
 
 
 
