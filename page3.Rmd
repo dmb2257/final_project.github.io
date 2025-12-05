@@ -39,7 +39,7 @@ liver_data_1 = liver_data_raw |>
                 CAN_DGN %in% c(4215, 4216) | CAN_DGN2 %in% c(4215, 4216) ~ "Alcohol-related Cirrhosis",
                 CAN_DGN == 4217 | CAN_DGN2 == 4217 ~ "Acute Alcohol-related Hepatitis",
                 TRUE ~ "Other")) %>% # days on waitlist
-filter(!is.na(PERS_ID) & !is.na(tx_date) & tx_year >= 2002 & REC_AGE_AT_TX >= 18,
+filter(!is.na(PERS_ID) & !is.na(tx_date) & tx_year >= 2020 & REC_AGE_AT_TX >= 18,
       alcohol_subtype != "Other") |> # MELD era only, Adults only
 arrange(PERS_ID, tx_date) |> 
   janitor::clean_names()
