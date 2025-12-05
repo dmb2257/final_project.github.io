@@ -333,10 +333,10 @@ div.tocify {
   <a href="page2.html">Waitlist Characteristics &amp; Mortality</a>
 </li>
 <li>
-  <a href="page3.html">Donor Demographics</a>
+  <a href="page3.html">Demographics</a>
 </li>
 <li>
-  <a href="page4.html">Page 4</a>
+  <a href="page4.html">Donor Characteristics</a>
 </li>
 <li>
   <a href="mailto:&lt;you@youremail.com&gt;">
@@ -345,7 +345,7 @@ div.tocify {
   </a>
 </li>
 <li>
-  <a href="http://github.com/dmb2257/">
+  <a href="https://github.com/dmb2257/final_project.github.io.git">
     <span class="fa fa-github fa-lg"></span>
      
   </a>
@@ -369,9 +369,9 @@ div.tocify {
 <p>Liver transplantation is a life-saving therapy for patients with
 end-stage liver disease, and Alcohol-Associated Liver Disease (ALD) has
 become one of its leading indications in the United States. As
-ALD-related morbidity and mortality continue to rise, understanding
-patterns in transplant access, candidate characteristics, and
-post-transplant outcomes has become increasingly important.</p>
+ALD-related morbidity and mortality continue to rise, understanding how
+ALD shapes waitlist dynamics, transplant access, and post-transplant
+outcomes has become increasingly important.</p>
 <p>In this website, we provide an overview of key aspects of liver
 transplantation with a focus on ALD, highlighting trends in candidate
 demographics, transplant rates, and post-transplant outcomes. Our goal
@@ -386,8 +386,8 @@ href="https://optn.transplant.hrsa.gov/">Organ Procurement and
 Transplantation Network (OPTN)</a>. The SRTR database consists of many
 data tables with many components, including data on the transplant
 waiting lists, the donor/recipient matching process, deceased donors,
-living donors, and transplant recipients. The data dictionary with all
-available variables can be found <a
+living donors, and transplant recipients. The data dictionary, which
+defines allavailable variables, can be found <a
 href="https://www.srtr.org/requesting-srtr-data/saf-data-dictionary/">here</a>.</p>
 </div>
 <div id="initial-questions" class="section level2">
@@ -395,16 +395,14 @@ href="https://www.srtr.org/requesting-srtr-data/saf-data-dictionary/">here</a>.<
 <p>We began by exploring the dataset and available variables to
 investigate changes in the transplant landscape over time. We focused on
 those listed with alcohol-related liver disease given the recent
-increases in alcohol use in the United States and given that it is now
-the leading indication for liver transplantation. We decided to break
-down the questions we asked into 3 key questions:</p>
+increases in alcohol use in the United States and because it is now the
+leading indication for liver transplantation.</p>
+<p>We decided to break down the questions we asked into 3 key areas:</p>
 <ol style="list-style-type: decimal">
-<li><p>What are some of the outcomes when placed on the waitlist for an
-organ?</p></li>
-<li><p>What are some of the characteristics of the organ
-recipients?</p></li>
-<li><p>What are some of the characteristics of the organ
-donors?</p></li>
+<li><p>What are the outcomes for patients placed on the organ
+waitlist?</p></li>
+<li><p>What are the characteristics of organ recipients?</p></li>
+<li><p>What are the characteristics of organ donors?</p></li>
 </ol>
 </div>
 <div id="evolution-of-questions" class="section level2">
@@ -447,11 +445,9 @@ included. Those with alcohol-related cirrhosis had <code>CAN_DGN</code>
 4215, 4216 and those with acute-alcohol related hepatitis had
 <code>CAN_DGN</code> 4217.</p></li>
 <li><p>Evaluation or transplant should have occurred after the year
-2020. We chose this time cut off because this is when liver transplants
-for a severe form of alcohol-related liver disease termed
-alcohol-related hepatitis, were first introduced.
-(<code>REC_TX_DT</code>, <code>CAN_LISTING_DT</code> &gt;=
-2020).</p></li>
+2020, the year when transplants for alcohol-related hepatitis became
+more widely adopted. (<code>REC_TX_DT</code>,
+<code>CAN_LISTING_DT</code> &gt;= 2020).</p></li>
 </ul>
 </div>
 <div id="exploratory-analysis" class="section level2">
@@ -506,14 +502,14 @@ life-saving treatment.</p>
 </div>
 <div id="limitations" class="section level2">
 <h2>Limitations</h2>
-<p>Below we have outlined a few limitations in our analysis: -
-<em>Limited capture of social determinants of health</em>: Key factors
-known to influence transplant access and outcomes—such as socioeconomic
-status, education, social support, and structural barriers to care—are
-not comprehensively represented in the dataset. As a result, we are
-unable to assess the role of social inequities in access to transplant
-and recovery.</p>
+<p>Below we have outlined a few limitations in our analysis:</p>
 <ul>
+<li><p><em>Limited capture of social determinants of health</em>: Key
+factors known to influence transplant access and outcomes—such as
+socioeconomic status, education, social support, and structural barriers
+to care—are not comprehensively represented in the dataset. As a result,
+we are unable to assess the role of social inequities in access to
+transplant and recovery.</p></li>
 <li><p><em>Incomplete and inconsistently reported data</em>: As we
 originally perused the data sets, we noted that several variables
 contained missing or the values were not recorded in the data
@@ -529,8 +525,6 @@ limiting inference regarding access disparities.</p></li>
 </div>
 <div id="discussion" class="section level2">
 <h2>Discussion</h2>
-<p>What were your findings? Are they what you expect? What insights into
-the data can you make?</p>
 <p>Our exploratory analyses provides context regarding the demographic
 landscape of liver transplantation in the United States for patients
 suffering from Alcohol-related Cirrhosis or Acute Alcohol-related
@@ -569,6 +563,21 @@ imbalance in who ultimately receives a transplant underscores the
 importance of ongoing efforts to improve donor recruitment and organ
 allocation policies that support equitable access across racial and
 demographic groups.</p>
+<p>Among alcohol-related liver transplant recipients, median donor age
+was significantly higher in cirrhosis cases compared with acute
+alcohol-related hepatitis (Wilcoxon rank-sum test p &lt; 0.001),
+suggesting meaningful differences in donor sourcing between etiologies.
+In addition, donor type varied significantly between groups (Chi-square
+p &lt; 0.001), indicating that the likelihood of receiving an organ from
+a living versus deceased donor may differ by clinical presentation of
+alcohol-related disease. Limitations: This analysis reflects observed
+associations but cannot infer causality due to its cross-sectional
+design. Diagnostic coding may misclassify etiologies, donor
+characteristics may be incompletely recorded, and sample sizes for
+certain subgroups may limit precision. External generalizability is
+constrained by reliance on U.S. transplant registry data, and unmeasured
+determinants such as disease severity, center-level policies, and
+socioeconomic factors were not captured.</p>
 </div>
 
 
