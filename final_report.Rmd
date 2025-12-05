@@ -7,7 +7,9 @@ output:
 ---
 
 ## Motivation
-Liver transplantation is a life-saving therapy for patients with end-stage liver disease, and Alcohol-Associated Liver Disease (ALD) has become one of its leading indications in the United States. As ALD-related morbidity and mortality continue to rise, understanding patterns in transplant access, candidate characteristics, and post-transplant outcomes has become increasingly important.
+Liver transplantation is a life-saving therapy for patients with end-stage liver disease, and Alcohol-Associated Liver Disease (ALD) has become one of its leading indications in the United States. As ALD-related morbidity and mortality continue to rise, understanding patterns in transplant access, candidate characteristics, and post-transplant outcomes has become increasingly important. 
+
+In this website, we provide an overview of key aspects of liver transplantation with a focus on ALD, highlighting trends in candidate demographics, transplant rates, and post-transplant outcomes. Our goal is to offer an accessible, data-driven perspective on the evolving role of ALD in liver transplantation.
 
 
 ## Related Work
