@@ -21,9 +21,10 @@ The contributors to this project are Elina Stoffel (es3866), Devon Park (dap2189
 Olivia Martinez (om2372), and Diane Benites (dmb2257).
 
 # Screencast
-Click here to watch our website screencast:
-insert screen cast
+Click below to watch our website screencast.
 
+<video width="640" controls>
+  <source src="Recording #10.mp4" type="video/mp4">
 
 
 
