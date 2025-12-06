@@ -18,7 +18,7 @@ library(gtsummary)
 library(gt)
 ```
 
-```{r load-data, echo=FALSE, warning=FALSE, message=FALSE, results='hide'}
+```{r load-data, echo=FALSE, warning=FALSE, message=FALSE}
 # Load both files
 liver_data <- read_sas("data/tx_li.sas7bdat")
 cand_liin <- read_sas("data/cand_liin.sas7bdat")
@@ -26,14 +26,14 @@ cand_liin <- read_sas("data/cand_liin.sas7bdat")
 # Extract only needed variables from tx_li (person-level death and transplant dates)
 tx_data_slim <- liver_data %>%
   group_by(PERS_ID) %>%
-  arrange(REC_TX_DT) %>%
+  arrange(REC_TX_DT) %>% #lists them chronologically
   summarise(
     first_tx_date = first(REC_TX_DT),
     tfl_death_date = first(TFL_DEATH_DT),
     .groups = 'drop'
-  ) %>%
+  ) %>% # now we have one row per person containing earliest transplant and death after transplant
   mutate(
-    first_tx_date = as.Date(first_tx_date),
+    first_tx_date = as.Date(first_tx_date), # converting to proper dates
     tfl_death_date = as.Date(tfl_death_date)
   )
 
@@ -65,23 +65,24 @@ waitlist_data <- cand_liin %>%
     listing_date = as.Date(CAN_LISTING_DT),
     listing_year = year(listing_date),
     removal_date = as.Date(CAN_REM_DT),
-    can_death_date = as.Date(CAN_DEATH_DT),
+    can_death_date = as.Date(CAN_DEATH_DT), #death while still on the waitlist
     
     # Combine death dates (use most complete)
-    death_date = coalesce(can_death_date, tfl_death_date)
+    death_date = coalesce(can_death_date, tfl_death_date) #picks the first non-missing value to ensure capturing mortality across both datasets
   )
 ```
 
 
-```{r prepare-data, echo=FALSE, warning=FALSE, message=FALSE, results='hide'}
+```{r prepare-data, echo=FALSE, warning=FALSE, message=FALSE}
 # Function to identify alcohol-related liver disease
 is_alcohol_related <- function(can_dgn, can_dgn2) {
   alcohol_codes <- c(4215, 4216, 4217)  # All alcohol-related codes
-  any(c(can_dgn, can_dgn2) %in% alcohol_codes, na.rm = TRUE)
+  any(c(can_dgn, can_dgn2) %in% alcohol_codes, na.rm = TRUE) #returns true if at least one matches
 }
 
+#Build the waitlist cohort
 waitlist_cohort <- waitlist_data %>%
-  filter(
+  filter( #remove. those with missing identifiers, listing date, or listings before 2020 and <18 years
     !is.na(PERS_ID),
     !is.na(listing_date),
     listing_year >= 2020,
@@ -111,8 +112,8 @@ waitlist_cohort <- waitlist_data %>%
     ), levels = c("Non-Hispanic White", "Non-Hispanic Black", "Non-Hispanic Other", "Hispanic")),
     
     # MELD at listing (initial MELD)
-    meld_at_listing = as.integer(substr(CAN_INIT_SRTR_LAB_MELD, 3, 4)),
-    meld_clean = ifelse(meld_at_listing >= 6 & meld_at_listing <= 40, meld_at_listing, NA),
+    meld_at_listing = as.integer(substr(CAN_INIT_SRTR_LAB_MELD, 3, 4)), #it's formated as e.g. "MELD-24" so we had to extract only the correct numbers
+    meld_clean = ifelse(meld_at_listing >= 6 & meld_at_listing <= 40, meld_at_listing, NA), #meld only ranges from 6-40 so the other ones must have been errors
     
     age_at_listing = CAN_AGE_AT_LISTING
   ) %>%

@@ -1,24 +1,13 @@
 ---
-title: "Page 3"
+title: "Demographics"
 output: 
   html_document:
     toc: true
     toc_float: true
 ---
 
-Devon's Workspace
-# Header
-text here 
 
-## Subsection 1
-text/code here
-
-## Subsection 2
-text/code here
-
-
-
-```{r}
+```{r, echo = FALSE, message = FALSE, warning = FALSE, results = "hide"}
  library(haven)
 library(tidyverse)
 library(scales)
@@ -28,17 +17,19 @@ library(scales)
 library(forcats)
 library(plotly)
 library(kableExtra)
+library(patchwork)
+
 ```
 
 
-```{r}
+```{r, echo=FALSE}
 liver_data_raw = read_sas("/Users/devonpark/Library/CloudStorage/OneDrive-ColumbiaUniversityIrvingMedicalCenter/tx_li.sas7bdat")
 
 ```
 
-GENERAL:
+## Overall Donor Demographics
 
-```{r}
+```{r, echo=FALSE}
 liver_data_1 = liver_data_raw |> 
   mutate(tx_date = as.Date(REC_TX_DT),
         listing_date = as.Date(CAN_LISTING_DT),
@@ -73,13 +64,21 @@ liver_data_clean_1 =
 ```
 
 
-```{r}
-liver_data_clean_1 |>
+```{r, echo=FALSE, eval=FALSE}
+race_allyears = liver_data_clean_1 |>
   count(tx_year, don_race_srtr_std) |>
   group_by(tx_year) |>
   mutate(pct = n / sum(n)) |>
   ungroup() |>
-  ggplot(aes(x = tx_year, y = pct, fill = don_race_srtr_std)) +
+  ggplot(aes(x = tx_year, 
+             y = pct, 
+             fill = don_race_srtr_std,
+             text = paste0(
+      "Year: ", tx_year, "<br>",
+      "Donor race: ", don_race_srtr_std, "<br>",
+      "Percent: ", percent(pct, accuracy = 0.1), "<br>",
+      "Count: ", n
+    ))) +
   geom_col(color = "white") +
   scale_y_continuous(labels = scales::percent_format()) +
   scale_fill_brewer(palette = "Set2") +
@@ -94,11 +93,15 @@ liver_data_clean_1 |>
     panel.grid.minor = element_blank(),
     axis.text.x = element_text(angle = 45, hjust = 1)
   )
+
+race_allyears = ggplotly(race_allyears, tooltip = "text")
+
+race_allyears
+
 ```
 
--------------------------------------------------------------------
 
-```{r}
+```{r, echo=FALSE}
 liver_data = liver_data_raw |> 
   mutate(tx_date = as.Date(REC_TX_DT),
         listing_date = as.Date(CAN_LISTING_DT),
@@ -114,8 +117,9 @@ arrange(PERS_ID, tx_date) |>
   janitor::clean_names()
 ```
 
-Looking at race:
-```{r}
+
+```{r, echo=FALSE}
+#Looking at race:
 #Clean don_Race column
 
 liver_data_clean = 
@@ -152,7 +156,7 @@ liver_data |>
 ```
 
 
-```{r}
+```{r, echo=FALSE}
 #liver_data_clean |> 
 #  distinct(don_race_srtr)
 
@@ -181,22 +185,40 @@ liver_data_clean =
 
 ```
 
-Race breakdown since 2020 annually for all donors 
-```{r}
-liver_data_clean |>
+## Donor Demographics: Alcohol Patients
+```{r, echo=FALSE}
+#Race breakdown since 2020 annually for all donors 
+race_starting_2020 <- liver_data_clean |>
   count(tx_year, don_race_srtr_std) |>
+  mutate(
+    don_race_srtr_std = case_when(
+      don_race_srtr_std == "Native Hawaiian or Other Pacific Islander" ~
+        "Native Hawaiian or Other\nPacific Islander",
+      TRUE ~ don_race_srtr_std
+    )
+  ) |>
   group_by(tx_year) |>
   mutate(pct = n / sum(n)) |>
   ungroup() |>
-  ggplot(aes(x = tx_year, y = pct, fill = don_race_srtr_std)) +
+  ggplot(aes(
+    x = tx_year,
+    y = pct,
+    fill = don_race_srtr_std,
+    text = paste0(
+      "Year: ", tx_year, "<br>",
+      "Race: ", don_race_srtr_std, "<br>",
+      "Percent: ", scales::percent(pct, accuracy = 0.1), "<br>",
+      "Count: ", n
+    )
+  )) +
   geom_col(color = "white") +
   scale_y_continuous(labels = scales::percent_format()) +
   scale_fill_brewer(palette = "Set2") +
   labs(
-    title = "Distribution of Donor Race by Transplant Year",
+    title = "Annual Race Distribution",
     x = "Transplant Year",
     y = "Percent",
-    fill = "Donor Race"
+    fill = NULL
   ) +
   theme_minimal() +
   theme(
@@ -206,69 +228,90 @@ liver_data_clean |>
 ```
 
 
-Side by side Deceased vs Living Donor Race Break Down (combining years 2020-2025)
-```{r}
-interactive_race = liver_data_clean |>
+
+```{r, echo=FALSE}
+#Side by side Deceased vs Living Donor Race Break Down (combining years 2020-2025)
+interactive_race <- liver_data_clean |>
   filter(don_ty %in% c("C", "L")) |>
   count(don_ty_factor, don_race_srtr_std) |>
+  mutate(
+    don_race_srtr_std = case_when(
+      don_race_srtr_std == "Native Hawaiian or Other Pacific Islander" ~
+        "Native Hawaiian or Other\nPacific Islander",
+      TRUE ~ don_race_srtr_std
+    )
+  ) |>
   group_by(don_ty_factor) |>
   mutate(pct = n / sum(n)) |>
   ungroup() |>
-  ggplot(aes(x = don_ty_factor, 
-             y = pct, 
-             fill = don_race_srtr_std,
-             text = paste0(
+  ggplot(aes(
+    x = don_ty_factor,
+    y = pct,
+    fill = don_race_srtr_std,
+    text = paste0(
       "Donor Type: ", don_ty_factor, "<br>",
       "Race: ", don_race_srtr_std, "<br>",
       "Percent: ", scales::percent(pct, accuracy = 0.1), "<br>",
       "Count: ", n
-    ))) +
+    )
+  )) +
   geom_col(color = "white") +
   scale_y_continuous(labels = percent_format()) +
   scale_fill_brewer(palette = "Set2") +
   labs(
-    title = "Donor Race Composition by Donor Type",
+    title = "Race Composition by Donor Type",
     x = "Donor Type",
     y = "Percent of Donors",
-    fill = "Race"
-  )+
-  theme_minimal()
+    fill = NULL
+  ) +
+  theme_minimal()+
+theme(
+    axis.title.y = element_blank()
+  )
 ```
 
-Interactive Version:
-```{r}
-ggplotly(interactive_race, tooltip = "text")
+
+```{r, echo=FALSE}
+
+plot_year  = ggplotly(race_starting_2020, tooltip = "text")
+plot_type  = ggplotly(interactive_race,   tooltip = "text")
+plot_type = style(plot_type, showlegend = FALSE)
+
+
+combined_race = subplot(
+  plot_year,
+  plot_type,
+  nrows = 1,
+  shareY = FALSE,   # or TRUE if you want same y-scale
+  titleX = TRUE,
+  titleY = TRUE
+) |>
+  layout(
+    title = list(text = "Donors: Distribution by Race and Type"),
+    legend = list(
+      orientation = "h",
+      x = 0.5,
+      xanchor = "center",
+      y = -0.15
+    )
+  )
+
+combined_race
+
+
+
 ```
 
 
-Exploratory: Look at deceased vs living donors and gender
+In 2020, a new indication for liver transplants was created for people with severe liver disease from alcohol. For this reason, the following demographics look at donors of patients (recipients) who were suffering from Alcohol-related Cirrhosis or Acute Alcohol-related Hepatitis. On the right you see the breakdown annually and on the left we see the break down across all the years by living and deceased. 
 
-```{r}
-liver_data_clean |> count(don_ty)
-liver_data_clean |> count(don_gender)
-liver_data_clean |> filter(don_ty == "L" | don_ty == "C") |> count(don_gender)
-liver_data_clean |> filter(don_ty == "C") |> count(don_gender)
-liver_data_clean |> filter(don_ty == "L") |> count(don_gender)
+The distribution of donor race among liver transplant donors in the United States has remained highly stable over time. Specifically, since 2020, White donors consistently account for the vast majority of all donors each year, representing approximately 75–85% of the donor pool. Black or African American donors make up the second-largest group, generally ranging from 10–20% across the years. Asian, American Indian or Alaska Native, Native Hawaiian or Other Pacific Islander, and Multi-Racial donors each represent a very small proportion of donors annually — typically under 5% combined. (Note: As you can see by hovering on the plot, this data is not complete for 2025 yet, so there are several fewer donors than years past)
+
+Contextually, based on the 2020 US Census, approximately 57.7% of the US population is White, 14.4% identify as Black or African American, 7% is Asian, 0.5% Native Hawaiian or Other Pacific Islander and 10.2% identify as multiracial. 
 
 
-liver_data_clean |> count(don_relationship_ty)
-```
 
-Exploratory: Look at citizenship
-```{r}
-liver_data_clean |> count(don_citizenship)
-#916 NA values
-
-#Code	Description
-#1	1: US Citizen
-#2	2: Resident Alien
-#3	3: Non-Resident Alien, Specify Country
-#4	4: Non-US Citizen/US Resident
-#5	5: Non-US Citizen/Non-US Resident
-#998	998: Unknown
-```
-
-```{r}
+```{r, echo=FALSE}
 
 liver_data_clean <- liver_data_clean |>
   mutate(
@@ -290,36 +333,10 @@ liver_data_clean <- liver_data_clean |>
   )
 ```
 
-Stacked barchart of citizenship: Decesased v Living Donor
-```{r}
 
-liver_data_clean |>
-  filter(don_ty %in% c("C", "L")) |>   # only deceased + living
-  count(don_ty_label, don_citizenship_label) |>
-  group_by(don_ty_label) |>
-  mutate(pct = n / sum(n)) |>
-  ungroup() |>
-  ggplot(aes(x = don_ty_label, y = pct, fill = don_citizenship_label)) +
-  geom_col(color = "white") +
-  scale_y_continuous(labels = percent_format()) +
-  scale_fill_brewer(palette = "Set2") +
-  labs(
-    title = "Donor Citizenship Status by Donor Type",
-    x = "Donor Type",
-    y = "Percent of Donors",
-    fill = "Citizenship"
-  ) +
-  theme_minimal() +
-  theme(
-    panel.grid.minor = element_blank(),
-    axis.text.x = element_text(size = 11),
-    legend.position = "right"
-  )
-```
 
-Interactive plotly version
-```{r}
-
+```{r, echo=FALSE}
+#Interactive plotly version
 plotly_citizenship = liver_data_clean |>
   filter(don_ty %in% c("C", "L")) |>   # only deceased + living
   count(don_ty_label, don_citizenship_label) |>
@@ -356,9 +373,11 @@ plotly_citizenship = liver_data_clean |>
 
 ggplotly(plotly_citizenship, tooltip = "text")
 ```
+For both Deceased and Living Donors, US citizens make up the largest population. However for deceased, US Citizens account for 89.4% and unkown ciizenship status accounts for 7.9%. 2.3% accounts for non-US citizen/US resident. 
 
-Interactive: Donor Gender
-```{r}
+
+```{r, echo=FALSE}
+#Interactive: Donor Gender
 gender_interactive = liver_data_clean |>
   filter(don_ty %in% c("C", "L")) |>
   count(don_ty_factor, don_gender) |>
@@ -394,13 +413,17 @@ gender_interactive = liver_data_clean |>
 
 ggplotly(gender_interactive, tooltip = "text")
 ```
+As seen in these plots, for deceased donors, males account for a larger percent of the donors whereas females account for a larger percent of living donors. 
+
+
 ------------------------------
 
-RECIPIENT INFO
+## Recipient Demographics 
 
 
-CLEAN THE DATA
-```{r}
+
+```{r, echo=FALSE}
+#CLEAN THE DATA
 liver_data_clean = liver_data_clean |>
   mutate(
     can_gender = factor(
@@ -422,8 +445,9 @@ liver_data_clean = liver_data_clean |>
 
 ```
 
-Race dsitribution from 2020 to 2025
-```{r}
+
+```{r, echo=FALSE}
+#Race dsitribution from 2020 to 2025
 race_donor_int = liver_data_clean |>
   count(tx_year, can_race_srtr_std) |>
   group_by(tx_year) |>
@@ -456,8 +480,13 @@ race_donor_int = liver_data_clean |>
 ggplotly(race_donor_int, tooltip = "text")
 ```
 
-Gender of Recipients
-```{r}
+
+For recipients between 2020 and 2025, people who identify as White account for 90% of liver recpients from 2020 to 2025. 
+
+
+
+```{r, echo=FALSE}
+#Gender of Recipients
 gender_donor_int = liver_data_clean |>
   count(can_gender) |>
   mutate(pct = n / sum(n)) |>
@@ -483,9 +512,14 @@ gender_donor_int = liver_data_clean |>
 ggplotly(gender_donor_int, tooltip = "text")
 ```
 
-Age distribution of Donors and Recipients 
 
-```{r}
+-------------------------------
+## Matching between Donor and Recipient
+
+#### Age
+
+```{r, echo=FALSE, warning = FALSE}
+#Age distribution of Donors and Recipients 
 liver_data_clean |>
   select(don_age, rec_age_at_tx) |>
   tidyr::pivot_longer(cols = everything(),
@@ -508,9 +542,12 @@ liver_data_clean |>
   theme_minimal()
 ```
 
+This density plot looks at the age distributions of donors and recipients. Recipients tend to be older than donors, with their age distribution being relatively narrow and peaking around the late 50s. In contrast, donors appear generally younger, with most falling between the mid-20s and mid-40s, and the spread is wider including both very young and older donors. The overlap between the distributions indicates that donor and recipient ages can be similar in some cases, but overall the curves show a clear shift of the donor distribution toward younger ages. This pattern aligns with clinical realities — most often donor mortality occurs earlier in life, while end-stage liver disease from Alcohol-related Cirrhosis or Acute Alcohol-related Hepatitis requiring transplant is more common among older adults.
 
-Age difference between donor and recipients
-```{r}
+
+
+```{r, echo=FALSE}
+#Age difference between donor and recipients
 liver_data_clean = liver_data_clean |>
   mutate(
     age_diff = don_age - rec_age_at_tx   # positive means donor older than recipient
@@ -518,8 +555,9 @@ liver_data_clean = liver_data_clean |>
 
 ```
 
-Histogram of Age Difference
-```{r}
+
+```{r, echo=FALSE, eval=FALSE}
+#Histogram of Age Difference
 liver_data_clean |>
   ggplot(aes(x = age_diff)) +
   geom_histogram(binwidth = 2, fill = "steelblue", color = "white") +
@@ -533,8 +571,8 @@ liver_data_clean |>
 ```
 
 
-Calculate the mean and standard deviation
-```{r}
+```{r, echo=FALSE}
+#Calculate the mean and standard deviation
 age_stats = liver_data_clean |>
   summarise(
     mean = mean(age_diff, na.rm = TRUE),
@@ -546,11 +584,12 @@ sigma = age_stats$sd
 
 ```
 
-Histogram with Normal Distribution Line
-```{r}
+
+```{r, echo=FALSE}
+#Histogram with Normal Distribution Line
 n <- nrow(liver_data_clean)
 
-liver_data_clean |>
+age_diff_hist = liver_data_clean |>
   ggplot(aes(x = age_diff)) +
   geom_histogram(
     binwidth = 2,
@@ -567,7 +606,7 @@ liver_data_clean |>
   # Zero line
   geom_vline(xintercept = 0, linetype = "dashed", color = "black") +
   labs(
-    title = "Distribution of Donor–Recipient Age Differences",
+    title = "Donor–Recipient Age Differences",
     subtitle = paste0("Normal Curve: mean = ", round(mu,1), 
                       ", sd = ", round(sigma,1)),
     x = "Donor Age – Recipient Age (years)",
@@ -577,9 +616,10 @@ liver_data_clean |>
 ```
 
 
-Donor - Recipient Age Difference based on Living and Deceased Donor 
-```{r}
-liver_data_clean |>
+
+```{r, echo=FALSE}
+#Donor - Recipient Age Difference based on Living and Deceased Donor 
+age_dif_don_stat = liver_data_clean |>
   filter(don_ty %in% c("C", "L")) |>
   mutate(
     don_ty_label = ifelse(don_ty == "C", "Deceased Donor", "Living Donor")
@@ -598,11 +638,26 @@ liver_data_clean |>
   theme(legend.position = "none")
 ```
 
--------------------------------
-Exploratory: Does race match?
 
-Make a variable that says if they match
-```{r}
+```{r, echo=FALSE, warning=FALSE}
+age_diff_hist + age_dif_don_stat +
+  plot_layout(ncol = 2, heights = c(1,1)) +
+  plot_annotation(
+    title = "Donor–Recipient Age Difference Distribution and Comparison"
+  ) &
+  theme(
+    plot.title = element_text(hjust = 0.5),
+    legend.position = "none"
+  )
+```
+
+These graphs show how donor–recipient age differences vary between living and deceased donor liver transplants for Alcohol-related Cirrhosis or Acute Alcohol-related Hepatitis. Overall, the distribution is centered around a mean age gap of approximately −11 years, meaning donors are typically about 10–12 years younger than recipients. When comparing donor types, living donors show a more consistent and slightly larger age gap, which aligns with the expectation that living donation often involves younger family members donating to older relatives. In contrast, deceased donors display a wider age range, including more extreme cases where donors are substantially older or younger than recipients. Together, these results highlight that donor age dynamics differ by donor type, with living donation more likely to involve biologically related pairs and therefore more predictable age relationships.
+
+
+#### Race
+
+```{r, echo=FALSE}
+#Make a variable that says if they match
 liver_data_clean = liver_data_clean |>
   mutate(
     race_match = ifelse(
@@ -613,23 +668,24 @@ liver_data_clean = liver_data_clean |>
   )
 ```
 
-Overall Race Match
-- Just to be written in the report
-```{r}
+
+```{r, echo=FALSE, eval = FALSE}
+#Overall Race Match- Just to be written in the report
 liver_data_clean |>
   count(race_match) |>
   mutate(pct = n / sum(n))
 ```
 
-```{r}
+```{r, echo=FALSE, eval = FALSE}
 liver_data_clean |>
   count(can_race_srtr_std, race_match) |>
   group_by(can_race_srtr_std) |>
   mutate(pct = n / sum(n))
 ```
 
-Heat Map
-```{r}
+
+```{r, echo=FALSE}
+#Heat Map
 liver_data_clean |>
   count(can_race_srtr_std, don_race_srtr_std) |>
   group_by(can_race_srtr_std) |>
@@ -658,9 +714,8 @@ labs(
 ```
 
 
-Make variable to see if race matches 
-```{r}
-
+```{r, echo=FALSE}
+#Make variable to see if race matches 
 race_match_by_don_type <- liver_data_clean |>
   mutate(
     # Clean donor type
@@ -688,7 +743,7 @@ race_match_by_don_type <- liver_data_clean |>
 ```
 
 
-```{r}
+```{r, echo=FALSE}
 race_match_by_don_type_wide <- race_match_by_don_type |>
   select("Donor Type" = don_ty_label, 
          race_match, pct_fmt) |>
@@ -709,6 +764,8 @@ race_match_by_don_type_wide |>
   )
 ```
 
+
+This heat map shows the percentage of liver transplants where the donor and recipient share the same race. Because White donors make up the largest proportion of the donor pool, White–White transplants are the most common match (highest percentage). Black recipients are also most likely to receive an organ from Black donors compared to other minority groups, though their match rate is noticeably lower than that of White recipients. In contrast, recipients from smaller racial groups (Asian, Native Hawaiian or Other Pacific Islander, American Indian or Alaska Native, and Multi-Racial) rarely receive donations from a donor of the same race. These patterns reflect persistent disparities in donor race availability and indicate that minority recipients often rely on organs from White donors.
 
 
 
