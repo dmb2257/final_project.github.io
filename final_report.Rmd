@@ -13,7 +13,7 @@ In this website, we provide an overview of key aspects of liver transplantation 
 
 
 ## Related Work
-We were inspired to perform this analysis after discovering data from the SRTR database. SRTR's primary source of data is the [Organ Procurement and Transplantation Network (OPTN)](https://optn.transplant.hrsa.gov/). The SRTR database consists of many data tables with many components, including data on the transplant waiting lists, the donor/recipient matching process, deceased donors, living donors, and transplant recipients.  The data dictionary, which defines allavailable variables, can be found [here](https://www.srtr.org/requesting-srtr-data/saf-data-dictionary/).
+We were inspired to perform this analysis after discovering data from the SRTR database. SRTR's primary source of data is the [Organ Procurement and Transplantation Network (OPTN)](https://optn.transplant.hrsa.gov/). The SRTR database consists of many data tables with many components, including data on the transplant waiting lists, the donor/recipient matching process, deceased donors, living donors, and transplant recipients.  The data dictionary, which defines all available variables, can be found [here](https://www.srtr.org/requesting-srtr-data/saf-data-dictionary/).
 
 ## Initial Questions
 We began by exploring the dataset and available variables to investigate changes in the transplant landscape over time. We focused on those listed with alcohol-related liver disease given the recent increases in alcohol use in the United States and because it is now the leading indication for liver transplantation.
