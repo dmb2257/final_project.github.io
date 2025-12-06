@@ -36,6 +36,8 @@
 <script src="site_libs/navigation-1.1/codefolding.js"></script>
 <link href="site_libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
 <script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+<script src="site_libs/kePrint-0.0.1/kePrint.js"></script>
+<link href="site_libs/lightable-0.0.1/lightable.css" rel="stylesheet" />
 <link href="site_libs/font-awesome-6.5.2/css/all.min.css" rel="stylesheet" />
 <link href="site_libs/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet" />
 
@@ -340,16 +342,16 @@ div.tocify {
   <a href="page3.html">Demographics</a>
 </li>
 <li>
-  <a href="page4.html">Page 4</a>
+  <a href="page4.html">Donor Characteristics</a>
 </li>
 <li>
-  <a href="mailto:&lt;you@youremail.com&gt;">
+  <a href="mailto:&lt;dmb2257@cumc.columbia.edu&gt;">
     <span class="fa fa-envelope fa-lg"></span>
      
   </a>
 </li>
 <li>
-  <a href="https://github.com/elinastoffel/final_project.git">
+  <a href="https://github.com/dmb2257/final_project.github.io.git">
     <span class="fa fa-github fa-lg"></span>
      
   </a>
@@ -377,12 +379,76 @@ Characteristics and Prevalence</h1>
 </div>
 
 
-<div
-id="alcohol-related-liver-transplants-donor-characteristics-and-prevalence"
-class="section level1">
-<h1>Alcohol-Related Liver Transplants: Donor Characteristics and
-Prevalence</h1>
-</div>
+<p>This section focuses on donor characteristics and prevalence,
+highlighting alcohol-related etiologies. The following tables and
+figures summarize the burden of alcohol-related disease and provide
+statistical comparisons between acute alcohol-related hepatitis and
+alcohol-related cirrhosis. This type of analysis is important because it
+contextualizes how differences in donor age, donor source, and disease
+subtype reflect broader shifts in transplant need and clinical
+decision-making. By identifying these patterns, we gain insights that
+can inform organ allocation priorities, improve clinical risk profiling,
+and guide future research aimed at prevention, treatment, and health
+system planning.</p>
+<p><img src="page4_files/liverdiseasepic.jpeg" /><!-- --></p>
+<p>This diagram illustrates the progression of Alcohol-Associated Liver
+Disease, showing reversible steatosis and hepatitis compared with
+irreversible cirrhosis requiring advanced care</p>
+<p>Source: Los Angeles Times, Alcoholic Hepatitis: Understanding Liver
+Damage &amp; Treatment.</p>
+<p>Acute alcohol-related hepatitis represents a sudden inflammatory
+injury to the liver caused by heavy alcohol use, and while severe, it
+can improve with abstinence and treatment; in contrast, alcohol-related
+cirrhosis reflects the advanced, irreversible stage of
+Alcohol-Associated Liver Disease in which long-term injury has led to
+fibrosis, scarring, and progressive liver failure. Understanding this
+distinction is important because hepatitis may still be reversible with
+coordinated medical care, whereas cirrhosis signals end-stage disease
+requiring long-term management and, for some patients, liver
+transplantation (Patel &amp; Mueller, Alcohol-Associated Liver Disease,
+2023).</p>
+<p>Source: Patel R, Mueller M. Alcohol-Associated Liver Disease.
+[Updated 2023 Jul 13]. In: StatPearls [Internet]. Treasure Island (FL):
+StatPearls Publishing; 2025 Jan-. Available from: <a
+href="https://www.ncbi.nlm.nih.gov/books/NBK546632/"
+class="uri">https://www.ncbi.nlm.nih.gov/books/NBK546632/</a></p>
+<pre class="r"><code># Read in the full transplant dataset from the SAS file.
+tx_li &lt;- read_sas(&quot;~/Desktop/tx_li (1).sas7bdat&quot;)
+
+# Create a cleaned liver transplant dataset for adults (≥18 years) from 2020 onward.
+liver_data &lt;- tx_li %&gt;%
+  mutate(
+    # Create transplant and listing dates.
+    tx_date      = as_date(REC_TX_DT),
+    listing_date = as_date(CAN_LISTING_DT),
+
+    # Extract transplant year.
+    tx_year = year(tx_date),
+
+    # Calculate days listed on the waitlist.
+    days_listed = as.numeric(difftime(tx_date, listing_date, units = &quot;days&quot;)),
+
+    # Define alcohol-related liver disease subtypes.
+    alcohol_subtype = case_when(
+      CAN_DGN  %in% c(4215, 4216) | CAN_DGN2 %in% c(4215, 4216) ~ &quot;Alcohol-related Cirrhosis&quot;,
+      CAN_DGN  == 4217            | CAN_DGN2 == 4217            ~ &quot;Acute Alcohol-related Hepatitis&quot;,
+      TRUE ~ &quot;Other&quot;
+    ),
+
+    # Create an indicator for ALD vs non-ALD.
+    ald_indication = if_else(alcohol_subtype == &quot;Other&quot;, 0L, 1L)
+  ) %&gt;%
+
+  # Keep adult recipients with observed transplant date from 2020 onward.
+  filter(
+    !is.na(PERS_ID),
+    !is.na(tx_date),
+    tx_year &gt;= 2020,
+    REC_AGE_AT_TX &gt;= 18
+  ) %&gt;%
+
+  # Clean column names to snake_case format for analysis.
+  clean_names()</code></pre>
 <div id="proportion-of-alcohol-related-liver-disease"
 class="section level1">
 <h1>Proportion of Alcohol-Related Liver Disease</h1>
@@ -390,7 +456,7 @@ class="section level1">
 versus non-alcohol-related diagnoses from 2020–2024, showing that
 alcohol-related disease constitutes a substantial but variable portion
 of transplant indications over time.</p>
-<pre class="r"><code># Create a summary table showing the prevalence of alcohol-related liver disease.
+<pre class="r"><code># Create a summary table showing the overall prevalence of alcohol-related liver disease.
 ald_prevalence_overall &lt;- liver_data %&gt;%
   count(ald_indication) %&gt;%
   mutate(
@@ -402,39 +468,62 @@ ald_prevalence_overall &lt;- liver_data %&gt;%
     pct = n / sum(n)
   )
 
-# Display the overall prevalence table.
-kable(
-  ald_prevalence_overall %&gt;%
-    select(ald_label, n, pct) %&gt;%
-    mutate(pct = percent(pct, accuracy = 0.1)),
-  col.names = c(&quot;Indication&quot;, &quot;Number of Transplants&quot;, &quot;Percent of Transplants&quot;),
-  caption   = &quot;Prevalence of Alcohol-Related Liver Disease Among Adult Liver Transplants (≥18, TX ≥2020).&quot;
-)</code></pre>
-<table>
-<caption>Prevalence of Alcohol-Related Liver Disease Among Adult Liver
-Transplants (≥18, TX ≥2020).</caption>
-<colgroup>
-<col width="41%" />
-<col width="28%" />
-<col width="29%" />
-</colgroup>
+# Clean overall prevalence table for display.
+ald_prevalence_overall_tbl &lt;- ald_prevalence_overall %&gt;%
+  transmute(
+    Indication               = ald_label,
+    `Number of Transplants`  = n,
+    `Percent of Transplants` = percent(pct, accuracy = 0.1)
+  )
+ald_prevalence_overall_tbl %&gt;%
+  kable(
+    caption = &quot;Prevalence of Alcohol-Related Liver Disease Among Adult Liver Transplants (≥18, TX ≥2020).&quot;,
+    align   = c(&quot;l&quot;, &quot;r&quot;, &quot;r&quot;)
+  ) %&gt;%
+  kable_styling(
+    full_width        = FALSE,
+    bootstrap_options = c(&quot;striped&quot;, &quot;hover&quot;, &quot;condensed&quot;)
+  )</code></pre>
+<table class="table table-striped table-hover table-condensed" style="color: black; width: auto !important; margin-left: auto; margin-right: auto;">
+<caption>
+Prevalence of Alcohol-Related Liver Disease Among Adult Liver
+Transplants (≥18, TX ≥2020).
+</caption>
 <thead>
-<tr class="header">
-<th align="left">Indication</th>
-<th align="right">Number of Transplants</th>
-<th align="left">Percent of Transplants</th>
+<tr>
+<th style="text-align:left;">
+Indication
+</th>
+<th style="text-align:right;">
+Number of Transplants
+</th>
+<th style="text-align:right;">
+Percent of Transplants
+</th>
 </tr>
 </thead>
 <tbody>
-<tr class="odd">
-<td align="left">Non–alcohol-related indications</td>
-<td align="right">38933</td>
-<td align="left">79.5%</td>
+<tr>
+<td style="text-align:left;">
+Non–alcohol-related indications
+</td>
+<td style="text-align:right;">
+38933
+</td>
+<td style="text-align:right;">
+79.5%
+</td>
 </tr>
-<tr class="even">
-<td align="left">Alcohol-related liver disease</td>
-<td align="right">10032</td>
-<td align="left">20.5%</td>
+<tr>
+<td style="text-align:left;">
+Alcohol-related liver disease
+</td>
+<td style="text-align:right;">
+10032
+</td>
+<td style="text-align:right;">
+20.5%
+</td>
 </tr>
 </tbody>
 </table>
@@ -452,108 +541,172 @@ ald_prevalence_year &lt;- liver_data %&gt;%
   ) %&gt;%
   ungroup()
 
-# Display the year-specific prevalence table.
-kable(
-  ald_prevalence_year %&gt;%
-    select(tx_year, ald_label, n, pct) %&gt;%
-    mutate(pct = percent(pct, accuracy = 0.1)),
-  col.names = c(&quot;Transplant Year&quot;, &quot;Indication&quot;, &quot;Number of Transplants&quot;, &quot;Percent within Year&quot;),
-  caption   = &quot;Prevalence of Alcohol-Related Liver Disease by Transplant Year (Adults ≥18, TX ≥2020).&quot;
-)</code></pre>
-<table>
-<caption>Prevalence of Alcohol-Related Liver Disease by Transplant Year
-(Adults ≥18, TX ≥2020).</caption>
-<colgroup>
-<col width="17%" />
-<col width="35%" />
-<col width="24%" />
-<col width="22%" />
-</colgroup>
+# Make a wide, organized table by year: one row per year.
+ald_prevalence_year_wide &lt;- ald_prevalence_year %&gt;%
+  select(tx_year, ald_label, n, pct) %&gt;%
+  mutate(
+    pct = percent(pct, accuracy = 0.1),
+    ald_label = factor(
+      ald_label,
+      levels = c(&quot;Non–alcohol-related indications&quot;, &quot;Alcohol-related liver disease&quot;)
+    )
+  ) %&gt;%
+  arrange(tx_year, ald_label) %&gt;%
+  pivot_wider(
+    names_from  = ald_label,
+    values_from = c(n, pct),
+    names_glue  = &quot;{ald_label} ({.value})&quot;
+  )
+
+ald_prevalence_year_wide %&gt;%
+  kable(
+    caption = &quot;Prevalence of Alcohol-Related Liver Disease by Transplant Year (Adults ≥18, TX ≥2020).&quot;,
+    col.names = c(
+      &quot;Transplant Year&quot;,
+      &quot;Non–ALD (N)&quot;, &quot;ALD (N)&quot;,
+      &quot;Non–ALD (%)&quot;, &quot;ALD (%)&quot;
+    ),
+    align = c(&quot;c&quot;, &quot;r&quot;, &quot;r&quot;, &quot;r&quot;, &quot;r&quot;)
+  ) %&gt;%
+  kable_styling(
+    full_width        = FALSE,
+    bootstrap_options = c(&quot;striped&quot;, &quot;hover&quot;, &quot;condensed&quot;)
+  )</code></pre>
+<table class="table table-striped table-hover table-condensed" style="color: black; width: auto !important; margin-left: auto; margin-right: auto;">
+<caption>
+Prevalence of Alcohol-Related Liver Disease by Transplant Year (Adults
+≥18, TX ≥2020).
+</caption>
 <thead>
-<tr class="header">
-<th align="right">Transplant Year</th>
-<th align="left">Indication</th>
-<th align="right">Number of Transplants</th>
-<th align="left">Percent within Year</th>
+<tr>
+<th style="text-align:center;">
+Transplant Year
+</th>
+<th style="text-align:right;">
+Non–ALD (N)
+</th>
+<th style="text-align:right;">
+ALD (N)
+</th>
+<th style="text-align:right;">
+Non–ALD (%)
+</th>
+<th style="text-align:right;">
+ALD (%)
+</th>
 </tr>
 </thead>
 <tbody>
-<tr class="odd">
-<td align="right">2020</td>
-<td align="left">Non–alcohol-related indications</td>
-<td align="right">5153</td>
-<td align="left">61.3%</td>
+<tr>
+<td style="text-align:center;">
+2020
+</td>
+<td style="text-align:right;">
+5153
+</td>
+<td style="text-align:right;">
+3251
+</td>
+<td style="text-align:right;">
+61.3%
+</td>
+<td style="text-align:right;">
+38.7%
+</td>
 </tr>
-<tr class="even">
-<td align="right">2020</td>
-<td align="left">Alcohol-related liver disease</td>
-<td align="right">3251</td>
-<td align="left">38.7%</td>
+<tr>
+<td style="text-align:center;">
+2021
+</td>
+<td style="text-align:right;">
+5200
+</td>
+<td style="text-align:right;">
+3534
+</td>
+<td style="text-align:right;">
+59.5%
+</td>
+<td style="text-align:right;">
+40.5%
+</td>
 </tr>
-<tr class="odd">
-<td align="right">2021</td>
-<td align="left">Non–alcohol-related indications</td>
-<td align="right">5200</td>
-<td align="left">59.5%</td>
+<tr>
+<td style="text-align:center;">
+2022
+</td>
+<td style="text-align:right;">
+6283
+</td>
+<td style="text-align:right;">
+2718
+</td>
+<td style="text-align:right;">
+69.8%
+</td>
+<td style="text-align:right;">
+30.2%
+</td>
 </tr>
-<tr class="even">
-<td align="right">2021</td>
-<td align="left">Alcohol-related liver disease</td>
-<td align="right">3534</td>
-<td align="left">40.5%</td>
+<tr>
+<td style="text-align:center;">
+2023
+</td>
+<td style="text-align:right;">
+9708
+</td>
+<td style="text-align:right;">
+416
+</td>
+<td style="text-align:right;">
+95.9%
+</td>
+<td style="text-align:right;">
+4.1%
+</td>
 </tr>
-<tr class="odd">
-<td align="right">2022</td>
-<td align="left">Non–alcohol-related indications</td>
-<td align="right">6283</td>
-<td align="left">69.8%</td>
+<tr>
+<td style="text-align:center;">
+2024
+</td>
+<td style="text-align:right;">
+10785
+</td>
+<td style="text-align:right;">
+100
+</td>
+<td style="text-align:right;">
+99.1%
+</td>
+<td style="text-align:right;">
+0.9%
+</td>
 </tr>
-<tr class="even">
-<td align="right">2022</td>
-<td align="left">Alcohol-related liver disease</td>
-<td align="right">2718</td>
-<td align="left">30.2%</td>
-</tr>
-<tr class="odd">
-<td align="right">2023</td>
-<td align="left">Non–alcohol-related indications</td>
-<td align="right">9708</td>
-<td align="left">95.9%</td>
-</tr>
-<tr class="even">
-<td align="right">2023</td>
-<td align="left">Alcohol-related liver disease</td>
-<td align="right">416</td>
-<td align="left">4.1%</td>
-</tr>
-<tr class="odd">
-<td align="right">2024</td>
-<td align="left">Non–alcohol-related indications</td>
-<td align="right">10785</td>
-<td align="left">99.1%</td>
-</tr>
-<tr class="even">
-<td align="right">2024</td>
-<td align="left">Alcohol-related liver disease</td>
-<td align="right">100</td>
-<td align="left">0.9%</td>
-</tr>
-<tr class="odd">
-<td align="right">2025</td>
-<td align="left">Non–alcohol-related indications</td>
-<td align="right">1804</td>
-<td align="left">99.3%</td>
-</tr>
-<tr class="even">
-<td align="right">2025</td>
-<td align="left">Alcohol-related liver disease</td>
-<td align="right">13</td>
-<td align="left">0.7%</td>
+<tr>
+<td style="text-align:center;">
+2025
+</td>
+<td style="text-align:right;">
+1804
+</td>
+<td style="text-align:right;">
+13
+</td>
+<td style="text-align:right;">
+99.3%
+</td>
+<td style="text-align:right;">
+0.7%
+</td>
 </tr>
 </tbody>
 </table>
 <pre class="r"><code># Create a stacked bar plot showing the proportion of ALD vs non-ALD each year.
-ggplot(ald_prevalence_year, aes(x = tx_year, y = pct, fill = ald_label)) +
+ggplot(
+  ald_prevalence_year %&gt;% 
+    filter(tx_year %in% 2020:2024),
+  aes(x = tx_year, y = pct, fill = ald_label)
+) +
   geom_col(color = &quot;white&quot;) +
   scale_y_continuous(labels = percent_format(accuracy = 1)) +
   scale_fill_brewer(palette = &quot;Set2&quot;) +
@@ -565,22 +718,27 @@ ggplot(ald_prevalence_year, aes(x = tx_year, y = pct, fill = ald_label)) +
   ) +
   theme_minimal(base_size = 13) +
   theme(
-    panel.grid.minor = element_blank()
+    panel.grid.minor = element_blank(),
+    legend.position = &quot;bottom&quot;
   )</code></pre>
-<p><img src="page4_files/figure-html/unnamed-chunk-1-1.png" width="672" /></p>
+<p><img src="page4_files/figure-html/unnamed-chunk-3-1.png" width="672" /></p>
+<p>Figure 1. Annual distribution of liver transplants by indication
+shows that although alcohol-related disease accounted for a substantial
+share in 2020–2022, its contribution declined sharply in later
+years.</p>
 </div>
-<div id="donar-age-by-alcohol-related-liver-disease-etiology"
+<div id="donor-age-by-alcohol-related-liver-disease-etiology"
 class="section level1">
-<h1>Donar Age by Alcohol-Related Liver Disease Etiology</h1>
+<h1>Donor Age by Alcohol-Related Liver Disease Etiology</h1>
 <p>Donor age distributions stratified by alcohol-related etiology,
 illustrating visibly older donors among recipients transplanted for
 alcohol-related cirrhosis compared with acute alcohol-related
 hepatitis.</p>
-<pre class="r"><code># Restrict to alcohol-related liver disease transplant recipients.
+<pre class="r"><code># Restrict to transplant recipients whose indication is alcohol-related (exclude &quot;Other&quot;).
 liver_ald &lt;- liver_data %&gt;%
   filter(alcohol_subtype != &quot;Other&quot;)
 
-# Create a clean donor type factor for readability.
+# Create a readable donor type factor (deceased vs living vs other / unknown).
 liver_ald &lt;- liver_ald %&gt;%
   mutate(
     don_ty_factor = case_when(
@@ -594,112 +752,162 @@ liver_ald &lt;- liver_ald %&gt;%
     )
   )
 
-# Check the distribution of alcohol subtypes in this ALD cohort.
-liver_ald %&gt;%
-  count(alcohol_subtype) %&gt;%
+## --- Table 1: Count of alcohol-related transplants by etiology -----------------
+
+# Summarize the number of alcohol-related liver transplants by specific diagnosis.
+etiology_tab &lt;- liver_ald %&gt;%
+  count(alcohol_subtype, name = &quot;Number of Transplants&quot;) %&gt;%
+  rename(`Alcohol-related Diagnosis` = alcohol_subtype)
+
+# Display the etiology count table in a clean format.
+etiology_tab %&gt;%
   kable(
-    col.names = c(&quot;Alcohol-related Diagnosis&quot;, &quot;Number of Transplants&quot;),
-    caption   = &quot;Count of Alcohol-Related Liver Transplants by Etiology (Adults ≥18, TX ≥2020).&quot;
+    caption = &quot;Count of Alcohol-Related Liver Transplants by Etiology (Adults ≥18, TX ≥2020).&quot;,
+    align   = c(&quot;l&quot;,&quot;r&quot;)
+  ) %&gt;%
+  kable_styling(
+    full_width        = FALSE,
+    bootstrap_options = c(&quot;striped&quot;,&quot;hover&quot;,&quot;condensed&quot;)
   )</code></pre>
-<table>
-<caption>Count of Alcohol-Related Liver Transplants by Etiology (Adults
-≥18, TX ≥2020).</caption>
+<table class="table table-striped table-hover table-condensed" style="color: black; width: auto !important; margin-left: auto; margin-right: auto;">
+<caption>
+Count of Alcohol-Related Liver Transplants by Etiology (Adults ≥18, TX
+≥2020).
+</caption>
 <thead>
-<tr class="header">
-<th align="left">Alcohol-related Diagnosis</th>
-<th align="right">Number of Transplants</th>
+<tr>
+<th style="text-align:left;">
+Alcohol-related Diagnosis
+</th>
+<th style="text-align:right;">
+Number of Transplants
+</th>
 </tr>
 </thead>
 <tbody>
-<tr class="odd">
-<td align="left">Acute Alcohol-related Hepatitis</td>
-<td align="right">511</td>
+<tr>
+<td style="text-align:left;">
+Acute Alcohol-related Hepatitis
+</td>
+<td style="text-align:right;">
+511
+</td>
 </tr>
-<tr class="even">
-<td align="left">Alcohol-related Cirrhosis</td>
-<td align="right">9521</td>
+<tr>
+<td style="text-align:left;">
+Alcohol-related Cirrhosis
+</td>
+<td style="text-align:right;">
+9521
+</td>
 </tr>
 </tbody>
 </table>
-<pre class="r"><code># Summarize donor characteristics by alcohol-related etiology.
+<pre class="r"><code>## --- Table 2: Donor age summary by etiology ------------------------------------
+
+# Compute summary statistics for donor age within each alcohol-related etiology.
 donor_by_subtype &lt;- liver_ald %&gt;%
   group_by(alcohol_subtype) %&gt;%
   summarise(
     n_transplants     = n(),
     median_donor_age  = median(don_age, na.rm = TRUE),
     iqr_donor_age     = IQR(don_age, na.rm = TRUE),
-    mean_donor_age    = mean(don_age, na.rm = TRUE),
-    sd_donor_age      = sd(don_age, na.rm = TRUE),
-    n_deceased_donors = sum(don_ty_factor == &quot;Deceased Donor&quot;, na.rm = TRUE),
-    n_living_donors   = sum(don_ty_factor == &quot;Living Donor&quot;,  na.rm = TRUE),
-    pct_deceased      = 100 * n_deceased_donors / n_transplants,
-    pct_living        = 100 * n_living_donors   / n_transplants,
+    mean_donor_age    = round(mean(don_age, na.rm = TRUE), 1),
+    sd_donor_age      = round(sd(don_age, na.rm = TRUE), 1),
     .groups           = &quot;drop&quot;
+  ) %&gt;%
+  rename(
+    `Etiology`          = alcohol_subtype,
+    `N Transplants`     = n_transplants,
+    `Median Donor Age`  = median_donor_age,
+    `IQR Donor Age`     = iqr_donor_age,
+    `Mean Donor Age`    = mean_donor_age,
+    `SD Donor Age`      = sd_donor_age
   )
 
-# Display the donor summary table.
-kable(
-  donor_by_subtype,
-  digits  = 1,
-  caption = &quot;Donor Age and Donor Type by Alcohol-Related Liver Disease Etiology (Adults ≥18, TX ≥2020).&quot;
-)</code></pre>
-<table>
-<caption>Donor Age and Donor Type by Alcohol-Related Liver Disease
-Etiology (Adults ≥18, TX ≥2020).</caption>
-<colgroup>
-<col width="19%" />
-<col width="8%" />
-<col width="10%" />
-<col width="8%" />
-<col width="9%" />
-<col width="7%" />
-<col width="11%" />
-<col width="9%" />
-<col width="7%" />
-<col width="6%" />
-</colgroup>
+# Display the donor age summary table.
+donor_by_subtype %&gt;%
+  kable(
+    caption = &quot;Donor Age Summary by Alcohol-Related Liver Disease Etiology (Adults ≥18, TX ≥2020).&quot;,
+    align   = c(&quot;l&quot;,&quot;r&quot;,&quot;r&quot;,&quot;r&quot;,&quot;r&quot;,&quot;r&quot;)
+  ) %&gt;%
+  kable_styling(
+    full_width        = FALSE,
+    bootstrap_options = c(&quot;striped&quot;,&quot;hover&quot;,&quot;condensed&quot;)
+  )</code></pre>
+<table class="table table-striped table-hover table-condensed" style="color: black; width: auto !important; margin-left: auto; margin-right: auto;">
+<caption>
+Donor Age Summary by Alcohol-Related Liver Disease Etiology (Adults ≥18,
+TX ≥2020).
+</caption>
 <thead>
-<tr class="header">
-<th align="left">alcohol_subtype</th>
-<th align="right">n_transplants</th>
-<th align="right">median_donor_age</th>
-<th align="right">iqr_donor_age</th>
-<th align="right">mean_donor_age</th>
-<th align="right">sd_donor_age</th>
-<th align="right">n_deceased_donors</th>
-<th align="right">n_living_donors</th>
-<th align="right">pct_deceased</th>
-<th align="right">pct_living</th>
+<tr>
+<th style="text-align:left;">
+Etiology
+</th>
+<th style="text-align:right;">
+N Transplants
+</th>
+<th style="text-align:right;">
+Median Donor Age
+</th>
+<th style="text-align:right;">
+IQR Donor Age
+</th>
+<th style="text-align:right;">
+Mean Donor Age
+</th>
+<th style="text-align:right;">
+SD Donor Age
+</th>
 </tr>
 </thead>
 <tbody>
-<tr class="odd">
-<td align="left">Acute Alcohol-related Hepatitis</td>
-<td align="right">511</td>
-<td align="right">37</td>
-<td align="right">22.0</td>
-<td align="right">38.8</td>
-<td align="right">13.4</td>
-<td align="right">510</td>
-<td align="right">1</td>
-<td align="right">99.8</td>
-<td align="right">0.2</td>
+<tr>
+<td style="text-align:left;">
+Acute Alcohol-related Hepatitis
+</td>
+<td style="text-align:right;">
+511
+</td>
+<td style="text-align:right;">
+37
+</td>
+<td style="text-align:right;">
+22.00
+</td>
+<td style="text-align:right;">
+38.8
+</td>
+<td style="text-align:right;">
+13.4
+</td>
 </tr>
-<tr class="even">
-<td align="left">Alcohol-related Cirrhosis</td>
-<td align="right">9521</td>
-<td align="right">41</td>
-<td align="right">23.2</td>
-<td align="right">41.7</td>
-<td align="right">14.9</td>
-<td align="right">9189</td>
-<td align="right">332</td>
-<td align="right">96.5</td>
-<td align="right">3.5</td>
+<tr>
+<td style="text-align:left;">
+Alcohol-related Cirrhosis
+</td>
+<td style="text-align:right;">
+9521
+</td>
+<td style="text-align:right;">
+41
+</td>
+<td style="text-align:right;">
+23.25
+</td>
+<td style="text-align:right;">
+41.7
+</td>
+<td style="text-align:right;">
+14.9
+</td>
 </tr>
 </tbody>
 </table>
-<pre class="r"><code># Create a boxplot showing the distribution of donor age by alcohol-related etiology.
+<pre class="r"><code>## --- Figure: Donor age distribution by etiology --------------------------------
+
+# Create a boxplot showing the distribution of donor age by alcohol-related etiology.
 ggplot(
   liver_ald,
   aes(x = alcohol_subtype, y = don_age, fill = alcohol_subtype)
@@ -714,29 +922,17 @@ ggplot(
   theme_minimal(base_size = 13) +
   theme(
     legend.position = &quot;none&quot;,
-    axis.text.x = element_text(angle = 20, hjust = 1)
+    axis.text.x     = element_text(angle = 20, hjust = 1)
   )</code></pre>
-<p><img src="page4_files/figure-html/unnamed-chunk-2-1.png" width="672" /></p>
-<pre class="r"><code># Perform a Wilcoxon rank-sum test comparing donor age by alcohol-related etiology.
-age_test_data &lt;- liver_ald %&gt;%
-  filter(alcohol_subtype %in% c(&quot;Alcohol-related Cirrhosis&quot;,
-                                &quot;Acute Alcohol-related Hepatitis&quot;)) %&gt;%
-  filter(!is.na(don_age))
+<p><img src="page4_files/figure-html/unnamed-chunk-4-1.png" width="672" /></p>
+<p>Figure 2. Boxplots reflect older donor age among recipients
+transplanted for alcohol-related cirrhosis compared with acute
+alcohol-related hepatitis; this visual trend aligns with Wilcoxon
+rank-sum test results indicating a statistically significant age
+difference between groups.</p>
+<pre class="r"><code>## --- Table 3: Donor type (deceased vs living) by etiology ----------------------
 
-wilcox_test_result &lt;- wilcox.test(
-  don_age ~ alcohol_subtype,
-  data = age_test_data
-)
-
-# Print the Wilcoxon test result to the console.
-wilcox_test_result</code></pre>
-<pre><code>## 
-##  Wilcoxon rank sum test with continuity correction
-## 
-## data:  don_age by alcohol_subtype
-## W = 2167902, p-value = 3.359e-05
-## alternative hypothesis: true location shift is not equal to 0</code></pre>
-<pre class="r"><code># Create a 2x2 table of alcohol-related etiology by donor type (living vs deceased).
+# Build a 2x2 table showing donor type within each alcohol-related etiology.
 donor_type_tab &lt;- liver_ald %&gt;%
   filter(
     alcohol_subtype %in% c(&quot;Alcohol-related Cirrhosis&quot;,
@@ -748,51 +944,199 @@ donor_type_tab &lt;- liver_ald %&gt;%
     names_from  = don_ty_factor,
     values_from = n,
     values_fill = 0
-  )
+  ) %&gt;%
+  rename(`Etiology` = alcohol_subtype)
 
-# Print the contingency table.
-kable(
-  donor_type_tab,
-  caption = &quot;Cross-Tabulation of Alcohol-Related Etiology by Donor Type.&quot;
-)</code></pre>
-<table>
-<caption>Cross-Tabulation of Alcohol-Related Etiology by Donor
-Type.</caption>
+# Display the donor type cross-tabulation.
+donor_type_tab %&gt;%
+  kable(
+    caption = &quot;Cross-Tabulation of Alcohol-Related Etiology by Donor Type (Adults ≥18, TX ≥2020).&quot;,
+    align   = c(&quot;l&quot;,&quot;r&quot;,&quot;r&quot;)
+  ) %&gt;%
+  kable_styling(
+    full_width        = FALSE,
+    bootstrap_options = c(&quot;striped&quot;,&quot;hover&quot;,&quot;condensed&quot;)
+  )</code></pre>
+<table class="table table-striped table-hover table-condensed" style="color: black; width: auto !important; margin-left: auto; margin-right: auto;">
+<caption>
+Cross-Tabulation of Alcohol-Related Etiology by Donor Type (Adults ≥18,
+TX ≥2020).
+</caption>
 <thead>
-<tr class="header">
-<th align="left">alcohol_subtype</th>
-<th align="right">Deceased Donor</th>
-<th align="right">Living Donor</th>
+<tr>
+<th style="text-align:left;">
+Etiology
+</th>
+<th style="text-align:right;">
+Deceased Donor
+</th>
+<th style="text-align:right;">
+Living Donor
+</th>
 </tr>
 </thead>
 <tbody>
-<tr class="odd">
-<td align="left">Acute Alcohol-related Hepatitis</td>
-<td align="right">510</td>
-<td align="right">1</td>
+<tr>
+<td style="text-align:left;">
+Acute Alcohol-related Hepatitis
+</td>
+<td style="text-align:right;">
+510
+</td>
+<td style="text-align:right;">
+1
+</td>
 </tr>
-<tr class="even">
-<td align="left">Alcohol-related Cirrhosis</td>
-<td align="right">9189</td>
-<td align="right">332</td>
+<tr>
+<td style="text-align:left;">
+Alcohol-related Cirrhosis
+</td>
+<td style="text-align:right;">
+9189
+</td>
+<td style="text-align:right;">
+332
+</td>
 </tr>
 </tbody>
 </table>
-<pre class="r"><code># Convert to a matrix for chi-squared or Fisher&#39;s exact test.
+<pre class="r"><code>## --- Wilcoxon rank-sum test: donor age by etiology -----------------------------
+
+# Prepare a two-group dataset (cirrhosis vs acute hepatitis) for the Wilcoxon test.
+age_test_data &lt;- liver_ald %&gt;%
+  filter(alcohol_subtype %in% c(&quot;Alcohol-related Cirrhosis&quot;,
+                                &quot;Acute Alcohol-related Hepatitis&quot;)) %&gt;%
+  filter(!is.na(don_age))
+
+# Run the Wilcoxon rank-sum test comparing donor age between etiologies.
+wilcox_test_result &lt;- wilcox.test(
+  don_age ~ alcohol_subtype,
+  data = age_test_data
+)
+
+# Convert the Wilcoxon test output into a short, readable summary table.
+wilcox_summary &lt;- tibble::tibble(
+  Test      = &quot;Wilcoxon rank-sum test (donor age by etiology)&quot;,
+  W         = as.numeric(wilcox_test_result$statistic),
+  `p-value` = format.pval(wilcox_test_result$p.value, digits = 3, eps = 0.001)
+)
+
+wilcox_summary %&gt;%
+  kable(
+    caption = &quot;Wilcoxon Rank-Sum Test Comparing Donor Age by Alcohol-Related Etiology.&quot;,
+    align   = c(&quot;l&quot;,&quot;r&quot;,&quot;r&quot;)
+  ) %&gt;%
+  kable_styling(
+    full_width        = FALSE,
+    bootstrap_options = c(&quot;striped&quot;,&quot;hover&quot;,&quot;condensed&quot;)
+  )</code></pre>
+<table class="table table-striped table-hover table-condensed" style="color: black; width: auto !important; margin-left: auto; margin-right: auto;">
+<caption>
+Wilcoxon Rank-Sum Test Comparing Donor Age by Alcohol-Related Etiology.
+</caption>
+<thead>
+<tr>
+<th style="text-align:left;">
+Test
+</th>
+<th style="text-align:right;">
+W
+</th>
+<th style="text-align:right;">
+p-value
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+Wilcoxon rank-sum test (donor age by etiology)
+</td>
+<td style="text-align:right;">
+2167902
+</td>
+<td style="text-align:right;">
+&lt;0.001
+</td>
+</tr>
+</tbody>
+</table>
+<pre class="r"><code>## --- Chi-squared test: donor type by etiology ----------------------------------
+
+# Convert the donor type cross-tabulation into a matrix for chi-squared testing.
 donor_type_matrix &lt;- donor_type_tab %&gt;%
-  select(-alcohol_subtype) %&gt;%
+  select(-Etiology) %&gt;%
   as.matrix()
 
-# Perform a chi-squared test; if counts are small, Fisher&#39;s exact test can be considered instead.
+# Perform a chi-squared test of donor type distribution across etiologies.
 chisq_test_result &lt;- stats::chisq.test(donor_type_matrix)
 
-# Print the chi-squared test result.
-chisq_test_result</code></pre>
-<pre><code>## 
-##  Pearson&#39;s Chi-squared test with Yates&#39; continuity correction
-## 
-## data:  donor_type_matrix
-## X-squared = 15.361, df = 1, p-value = 8.88e-05</code></pre>
+# Summarize the chi-squared test in a compact table for the report.
+chisq_summary &lt;- tibble::tibble(
+  Test        = &quot;Pearson&#39;s chi-squared test (etiology by donor type)&quot;,
+  `X-squared` = round(as.numeric(chisq_test_result$statistic), 2),
+  df          = as.integer(chisq_test_result$parameter),
+  `p-value`   = format.pval(chisq_test_result$p.value, digits = 3, eps = 0.001)
+)
+
+chisq_summary %&gt;%
+  kable(
+    caption = &quot;Chi-Squared Test of Alcohol-Related Etiology by Donor Type.&quot;,
+    align   = c(&quot;l&quot;,&quot;r&quot;,&quot;r&quot;,&quot;r&quot;)
+  ) %&gt;%
+  kable_styling(
+    full_width        = FALSE,
+    bootstrap_options = c(&quot;striped&quot;,&quot;hover&quot;,&quot;condensed&quot;)
+  )</code></pre>
+<table class="table table-striped table-hover table-condensed" style="color: black; width: auto !important; margin-left: auto; margin-right: auto;">
+<caption>
+Chi-Squared Test of Alcohol-Related Etiology by Donor Type.
+</caption>
+<thead>
+<tr>
+<th style="text-align:left;">
+Test
+</th>
+<th style="text-align:right;">
+X-squared
+</th>
+<th style="text-align:right;">
+df
+</th>
+<th style="text-align:right;">
+p-value
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+Pearson’s chi-squared test (etiology by donor type)
+</td>
+<td style="text-align:right;">
+15.36
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+&lt;0.001
+</td>
+</tr>
+</tbody>
+</table>
+<p>For results, the Wilcoxon rank-sum test was used to compare donor
+ages because age distributions were skewed, and results showed a
+statistically significant difference—donors for alcohol-related
+cirrhosis tended to be older than those for acute alcohol-related
+hepatitis (p &lt; 0.001). A chi-squared test was applied to evaluate
+whether donor type (living versus deceased) varied by etiology,
+revealing a significant association (p &lt; 0.001), with cirrhosis
+recipients more likely to receive grafts from living donors. Overall,
+the findings suggest clinically meaningful differences in donor age and
+donor source across alcohol-related disease subgroups, reinforcing the
+value of statistical testing to evaluate demographic and clinical
+patterns in transplant populations.</p>
 <hr />
 </div>
 
