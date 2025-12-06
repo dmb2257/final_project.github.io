@@ -372,10 +372,6 @@ chisq_summary %>%
 ```
 
 
-Results: The Wilcoxon rank-sum test was used to compare donor ages because age distributions were skewed, and results showed a statistically significant difference—donors for alcohol-related cirrhosis tended to be older than those for acute alcohol-related hepatitis (p < 0.001). A chi-squared test was applied to evaluate whether donor type (living versus deceased) varied by etiology, revealing a significant association (p < 0.001), with cirrhosis recipients more likely to receive grafts from living donors. 
-
-Discussion: Overall, the findings suggest clinically meaningful differences in donor age and donor source across alcohol-related disease subgroups, reinforcing the value of statistical testing to evaluate demographic and clinical patterns in transplant populations.
-
-Limitations: This analysis is limited by its observational design, which restricts causal interpretation and may reflect underlying referral, listing, and allocation biases rather than true etiologic differences. Additionally, unmeasured clinical factors, such as comorbidities, disease severity, provider decision-making, and social determinants influencing transplant eligibility, were not captured in this dataset, potentially influencing the observed patterns in donor age and donor type.  
+For results, the Wilcoxon rank-sum test was used to compare donor ages because age distributions were skewed, and results showed a statistically significant difference—donors for alcohol-related cirrhosis tended to be older than those for acute alcohol-related hepatitis (p < 0.001). A chi-squared test was applied to evaluate whether donor type (living versus deceased) varied by etiology, revealing a significant association (p < 0.001), with cirrhosis recipients more likely to receive grafts from living donors. Overall, the findings suggest clinically meaningful differences in donor age and donor source across alcohol-related disease subgroups, reinforcing the value of statistical testing to evaluate demographic and clinical patterns in transplant populations.
 
 ---
