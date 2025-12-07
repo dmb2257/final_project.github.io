@@ -88,3 +88,7 @@ Our results align with expectations that clinical urgency drives listing and wai
 
 Among alcohol-related liver transplant recipients, median donor age was significantly higher in cirrhosis cases compared with acute alcohol-related hepatitis (Wilcoxon rank-sum test p < 0.001), suggesting meaningful differences in donor sourcing between etiologies.
 In addition, donor type varied significantly between groups (Chi-square p < 0.001), indicating that the likelihood of receiving an organ from a living versus deceased donor may differ by clinical presentation of alcohol-related disease. Limitations: This analysis reflects observed associations but cannot infer causality due to its cross-sectional design. Diagnostic coding may misclassify etiologies, donor characteristics may be incompletely recorded, and sample sizes for certain subgroups may limit precision. External generalizability is constrained by reliance on U.S. transplant registry data, and unmeasured determinants such as disease severity, center-level policies, and socioeconomic factors were not captured.
+
+## Group Members
+The contributors to this project are Elina Stoffel (es3866), Devon Park (dap2189),
+Olivia Martinez (om2372), and Diane Benites (dmb2257).
