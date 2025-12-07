@@ -1,0 +1,51 @@
+---
+title: "Final Project Proposal"
+output: github_document
+date: "2025-11-05"
+---
+
+## Group Members: 
+The group members are Elina Stoffel (es3866), Devon Park (dap2189), Olivia Martinez (om2372), and Diane Benites (dmb2257). 
+
+## Tentative Project Title:
+Exploring Liver Transplants: Insights from the UNOS dataset.  
+
+
+## Project Motivation: 
+Liver disease ranks among the top ten causes of death in the United States. Rising rates of liver disease represent a major public health concern. Since transplantation is the only curative treatment, it is essential to examine issues of health equity, access, and health outcomes. By analyzing the Scientific Registry of Transplant Recipients (SRTR) database, this project aims to explore trends and disparities in liver transplant outcomes. Through data tidying, visualization, website creation, and exploratory analysis, the team hopes to understand how various factors influence survival outcomes. Understanding these trends can help inform equitable, data-driven improvements in liver disease management and transplant practices. Additionally, learning how to clean and analyze large datasets from online registries will provide valuable experience in coding. 
+
+ 
+
+## Intended Final Products: 
+The overarching goal of the project is to produce a website where users can learn about liver disease in the United States, explore trends, and gain insights into liver disease management and transplantation practices. The team plans to create a reproducible R Markdown report and webpage that includes cleaned data, analysis, and visualizations from the SRTR database. The report will include a table with demographics, outcomes, and statistical analyses such as regression or survival analysis by transplant diagnosis. Finally, the team will interpret the data and present findings for class discussion. 
+
+ 
+
+## Anticipated Data Sources: 
+The anticipated data source is de-identified data from the SRTR (Scientific Registry of Transplant Recipients) transplant registry. This registry provides comprehensive information on transplant recipients, donors, and outcomes across the United States, making it ideal for examining national trends in liver transplants. 
+
+ 
+
+## Planned Analyses: 
+The planned analyses will include cleaning and filtering the dataset to identify adult liver transplant recipients with alcohol-associated liver disease. Key predictors and outcome variables such as age, MELD score, and comorbidities across ALD and non-ALD groups will be selected. Post-transplant survival will be analyzed using Kaplan-Meier curves or a Cox proportional hazards model. These analyses will help assess the survival outcomes and disparities among patient groups. 
+
+ 
+
+## Visualizations: 
+The visualizations will be used to compare the distribution and relationships between several variables related to liver health and transplants. For example, graphs may illustrate how alcohol use affects liver function or transplant outcomes and how these effects vary by transplant center location, presence of fatty liver disease, or hepatitis status. The data will also be examined over time and across demographic and geographic factors such as age, gender, and region to identify patterns that may influence liver disease prevalence and treatment outcomes. So, we will have a geographic plot and frequency polygon chart.  
+
+ 
+ 
+## Coding Challenges: 
+The anticipated coding challenges include cleaning the large dataset, handling missing or inconsistent data, and filtering necessary data for analyses. The team will also need to determine how to design visualizations that are clear, accurate, and user-friendly. Ensuring that the website and R Markdown outputs are reproducible will also be an important technical consideration. 
+
+ 
+
+## Planned Timeline: 
+
+Week 1 (11/2 - 11/7): The dataset will be obtained, and the project proposal will be prepared. 
+Week 2 (11/9 - 11/15): The team will clean the data and conduct an initial exploratory analysis. 
+Week 3 (11/16 - 11/22): Statistical analysis of liver transplant outcomes will be conducted, and initial visualizations are created. 
+Week 4 (11/23 - 11/29): The webpage and screencast will be developed. 
+Week 5 (11/30 - 12/5): The report will be compiled, and visuals and the webpage will be refined. 
+Week 6 (12/7 - 12/10): The team will prepare for the in-class discussion of the final project. 
