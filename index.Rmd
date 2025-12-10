@@ -6,7 +6,7 @@ output:
     toc_float: true
 ---
 
-![Livers are cool!](photos/liver.jpg)
+![](photos/liver.jpg)
 
 # Introduction
 
@@ -21,7 +21,7 @@ The contributors to this project are Elina Stoffel (es3866), Devon Park (dap2189
 Olivia Martinez (om2372), and Diane Benites (dmb2257).
 
 # Screencast
-Click below to watch our website screencast.
+Click below to learn more about our website!
 
 <iframe width="640" height="360"
 src="https://www.youtube.com/embed/HVLx8UYjBkA"
