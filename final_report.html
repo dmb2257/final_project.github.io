@@ -463,7 +463,7 @@ listing severity, demographic composition, and raw waitlist mortality
 across clinical subgroups. Group comparisons in descriptive tables were
 assessed using non-parametric tests for continuous variables and
 χ²-based methods for categorical variables, with p-values provided to
-summarize evidence of between-group differences. T</p>
+summarize evidence of between-group differences.</p>
 <p>Kaplan–Meier curves were generated to compare waitlist survival
 between men and women. Each curve reflects time from listing to waitlist
 death, with censoring at transplant, administrative removal, or end of
@@ -480,16 +480,24 @@ Living donor transplants demonstrated slightly larger donor–recipient
 age gaps than deceased donor transplants, reflecting greater reliance on
 younger family members as donors.</p>
 <p>Recipient patient outcomes were also observed using the incidence of
-graft failures and patient status at the last follow-up. Across
-transplants with living donors and deceased donors, there was a similar
-distribution of each category of patient status. The most frequent
-patient status at the last follow up was “Living”. A subsample of the
-ALD cohort was created to identify transplants with graft failure. The
-time to graft failure was computed from the time between the transplant
-date and the graft failure date. This graft failure subsample was
-stratified by donor type and also by transplant type. It was found that
-there was a greater prevalence of single-organ liver transplants than
-multi-organ transplants.</p>
+graft failures and patient status at the last follow-up. These outcomes
+were stratified by donor type (<code>DON_TY</code>) to observe any
+differences between transplants from a living donor and transplants from
+a deceased donor. A column chart was used to visualize the frequencies
+of each donor type in the ALD cohort. We observed that there was a much
+greater number of transplants from a deceased donor than from a living
+donor. We also created one column chart for each donor type to visualize
+the recipient patient status recorded at the last follow-up. Across both
+donor types, there was a similar distribution of each category of
+patient status. The most frequent patient status was “Living” and the
+least frequent was “Lost to Follow Up”. We also observed a graft failure
+subsample of the ALD cohort. This was done by creating the variable,
+<code>failed_graft</code>, to identify transplants that also had a graft
+failure date listed. A new variable, time to graft failure
+(<code>time_to_fail</code>), was computed from the difference in days
+between the transplant date and the graft failure date. This graft
+failure subsample was also stratified by donor type and also by
+transplant type.</p>
 <p>Racial distribution analyses revealed that both donor sources and
 transplant recipients remain predominantly White, with racial minority
 groups—including Black/African American, Asian, American Indian/Alaska
@@ -524,6 +532,14 @@ metrics</em>: These analyses that describe demographic matching rely on
 observed donor–recipient pairs. Therefore, they do not capture the
 underlying pool of available organs or candidates at match-run time,
 limiting inference regarding access disparities.</p></li>
+<li><p><em>Constrained external generalizability</em>: This analysis
+reflects observed associations but cannot infer causality due to its
+cross-sectional design. Diagnostic coding may misclassify etiologies,
+donor characteristics may be incompletely recorded, and sample sizes for
+certain subgroups may limit precision. External generalizability is
+constrained by reliance on U.S. transplant registry data, and unmeasured
+determinants such as disease severity, center-level policies, and
+socioeconomic factors were not captured.</p></li>
 </ul>
 </div>
 <div id="discussion" class="section level2">
@@ -549,19 +565,18 @@ differences, waitlist mortality did not differ between men and women in
 either cirrhosis or acute alcohol-related hepatitis. This suggests that
 sex-based disparities in disease severity at listing do not translate
 into short-term differences in mortality risk after listing.</p>
-<p>Among the graft failure subsample, there was a lower proportion of
-multi-organ transplants than liver only transplants. There were no
-multi-organ transplants from living donors that experienced graft
+<p>Among the graft failure subsample, there was a greater proportion of
+single-organ liver transplants than multi-organ transplants. There were
+no multi-organ transplants from living donors that experienced graft
 failure. Findings also revealed that there was a greater number of
 single-organ liver transplants with graft failure among recipients with
-a deceased donor compared to those with a living donor. Visualizations
-of graft failure times revealed that the median time between the
-transplant date and graft failure was greater for transplants with
-deceased donors than that of transplants from living donors. The
-differences between patient outcomes across donor types should be
-interpreted with the consideration that there was a greater sample of
-transplants from deceased donors compared to those with living
-donors.</p>
+a deceased donor compared to those with a living donor. Boxplot
+visualizations revealed that the median time to graft failure was
+greater among transplants with deceased donors than that of transplants
+from living donors. The differences between patient outcomes across
+donor types should be interpreted with the consideration that there was
+a greater sample of transplants from deceased donors compared to those
+with living donors.</p>
 <p>Our results align with expectations that clinical urgency drives
 listing and waitlist survival outcomes, but they also highlight
 structural demographic constraints that extend beyond clinical severity.
@@ -579,14 +594,13 @@ suggesting meaningful differences in donor sourcing between etiologies.
 In addition, donor type varied significantly between groups (Chi-square
 p &lt; 0.001), indicating that the likelihood of receiving an organ from
 a living versus deceased donor may differ by clinical presentation of
-alcohol-related disease. Limitations: This analysis reflects observed
-associations but cannot infer causality due to its cross-sectional
-design. Diagnostic coding may misclassify etiologies, donor
-characteristics may be incompletely recorded, and sample sizes for
-certain subgroups may limit precision. External generalizability is
-constrained by reliance on U.S. transplant registry data, and unmeasured
-determinants such as disease severity, center-level policies, and
-socioeconomic factors were not captured.</p>
+alcohol-related disease.</p>
+</div>
+<div id="group-members" class="section level2">
+<h2>Group Members</h2>
+<p>The contributors to this project are Elina Stoffel (es3866), Devon
+Park (dap2189), Olivia Martinez (om2372), and Diane Benites
+(dmb2257).</p>
 </div>
 
 
